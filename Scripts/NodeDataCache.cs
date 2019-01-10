@@ -74,8 +74,8 @@ namespace XNode {
 
                 //Get InputAttribute and OutputAttribute
                 object[] attribs = fieldInfo[i].GetCustomAttributes(false);
-                Node.InputAttribute inputAttrib = attribs.FirstOrDefault(x => x is Node.InputAttribute) as Node.InputAttribute;
-                Node.OutputAttribute outputAttrib = attribs.FirstOrDefault(x => x is Node.OutputAttribute) as Node.OutputAttribute;
+                InputAttribute inputAttrib = attribs.FirstOrDefault(x => x is InputAttribute) as InputAttribute;
+                OutputAttribute outputAttrib = attribs.FirstOrDefault(x => x is OutputAttribute) as OutputAttribute;
 
                 if (inputAttrib == null && outputAttrib == null) continue;
 

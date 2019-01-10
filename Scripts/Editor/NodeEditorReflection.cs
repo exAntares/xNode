@@ -42,9 +42,9 @@ namespace XNodeEditor {
         public static Dictionary<Type, Color> GetNodeTint() {
             Dictionary<Type, Color> tints = new Dictionary<Type, Color>();
             for (int i = 0; i < nodeTypes.Length; i++) {
-                var attribs = nodeTypes[i].GetCustomAttributes(typeof(XNode.Node.NodeTint), true);
+                var attribs = nodeTypes[i].GetCustomAttributes(typeof(XNode.NodeTint), true);
                 if (attribs == null || attribs.Length == 0) continue;
-                XNode.Node.NodeTint attrib = attribs[0] as XNode.Node.NodeTint;
+                XNode.NodeTint attrib = attribs[0] as XNode.NodeTint;
                 tints.Add(nodeTypes[i], attrib.color);
             }
             return tints;
@@ -53,9 +53,9 @@ namespace XNodeEditor {
         public static Dictionary<Type, int> GetNodeWidth() {
             Dictionary<Type, int> widths = new Dictionary<Type, int>();
             for (int i = 0; i < nodeTypes.Length; i++) {
-                var attribs = nodeTypes[i].GetCustomAttributes(typeof(XNode.Node.NodeWidth), true);
+                var attribs = nodeTypes[i].GetCustomAttributes(typeof(XNode.NodeWidth), true);
                 if (attribs == null || attribs.Length == 0) continue;
-                XNode.Node.NodeWidth attrib = attribs[0] as XNode.Node.NodeWidth;
+                XNode.NodeWidth attrib = attribs[0] as XNode.NodeWidth;
                 widths.Add(nodeTypes[i], attrib.width);
             }
             return widths;
