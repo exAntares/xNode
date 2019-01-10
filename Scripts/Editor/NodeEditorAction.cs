@@ -15,7 +15,7 @@ namespace XNodeEditor {
         private bool IsHoveringPort { get { return hoveredPort != null; } }
         private bool IsHoveringNode { get { return hoveredNode != null; } }
         private bool IsHoveringReroute { get { return hoveredReroute.port != null; } }
-        private XNode.Node hoveredNode = null;
+        private XNode.INode hoveredNode = null;
         [NonSerialized] private XNode.NodePort hoveredPort = null;
         [NonSerialized] private XNode.NodePort draggedOutput = null;
         [NonSerialized] private XNode.NodePort draggedOutputTarget = null;
@@ -168,7 +168,7 @@ namespace XNodeEditor {
                             }
                         } else if (IsHoveringNode && IsHoveringTitle(hoveredNode)) {
                             // If mousedown on node header, select or deselect
-                            if (!Selection.Contains(hoveredNode)) {
+                            if (!Selection.Contains(hoveredNode as UnityEngine.Object)) {
                                 SelectNode(hoveredNode, e.control || e.shift);
                                 if (!e.control && !e.shift) selectedReroutes.Clear();
                             } else if (e.control || e.shift) DeselectNode(hoveredNode);
@@ -208,20 +208,20 @@ namespace XNodeEditor {
                             //If connection is valid, save it
                             if (draggedOutputTarget != null) {
                                 var node = draggedOutputTarget.node;
-                                if (graph.nodes.Count != 0) draggedOutput.Connect(draggedOutputTarget);
+                                if (graph.NodesCount != 0) draggedOutput.Connect(draggedOutputTarget);
 
                                 // ConnectionIndex can be -1 if the connection is removed instantly after creation
                                 int connectionIndex = draggedOutput.GetConnectionIndex(draggedOutputTarget);
                                 if (connectionIndex != -1) {
                                     draggedOutput.GetReroutePoints(connectionIndex).AddRange(draggedOutputReroutes);
                                     if (NodeEditor.onUpdateNode != null) NodeEditor.onUpdateNode(node);
-                                    EditorUtility.SetDirty(graph);
+                                    EditorUtility.SetDirty(graph as UnityEngine.Object);
                                 }
                             }
                             //Release dragged connection
                             draggedOutput = null;
                             draggedOutputTarget = null;
-                            EditorUtility.SetDirty(graph);
+                            EditorUtility.SetDirty(graph as UnityEngine.Object);
                             if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
                         } else if (currentActivity == NodeActivity.DragNode) {
                             IEnumerable<XNode.Node> nodes = Selection.objects.Where(x => x is XNode.Node).Select(x => x as XNode.Node);
@@ -261,7 +261,7 @@ namespace XNodeEditor {
                             } else if (IsHoveringPort) {
                                 ShowPortContextMenu(hoveredPort);
                             } else if (IsHoveringNode && IsHoveringTitle(hoveredNode)) {
-                                if (!Selection.Contains(hoveredNode)) SelectNode(hoveredNode, false);
+                                if (!Selection.Contains(hoveredNode as UnityEngine.Object)) SelectNode(hoveredNode, false);
                                 GenericMenu menu = new GenericMenu();
                                 NodeEditor.GetEditor(hoveredNode).AddContextMenuItems(menu);
                                 menu.DropDown(new Rect(Event.current.mousePosition, Vector2.zero));
@@ -354,12 +354,8 @@ namespace XNodeEditor {
         }
 
         /// <summary> Draw this node on top of other nodes by placing it last in the graph.nodes list </summary>
-        public void MoveNodeToTop(XNode.Node node) {
-            int index;
-            while ((index = graph.nodes.IndexOf(node)) != graph.nodes.Count - 1) {
-                graph.nodes[index] = graph.nodes[index + 1];
-                graph.nodes[index + 1] = node;
-            }
+        public void MoveNodeToTop(XNode.INode node) {
+            graph.MoveNodeToTop(node);
         }
 
         /// <summary> Duplicate selected nodes and select the duplicates </summary>
@@ -437,10 +433,10 @@ namespace XNodeEditor {
             }
         }
 
-        bool IsHoveringTitle(XNode.Node node) {
+        bool IsHoveringTitle(XNode.INode node) {
             Vector2 mousePos = Event.current.mousePosition;
             //Get node position
-            Vector2 nodePos = GridToWindowPosition(node.position);
+            Vector2 nodePos = GridToWindowPosition(node.Position);
             float width;
             Vector2 size;
             if (nodeSizes.TryGetValue(node, out size)) width = size.x;

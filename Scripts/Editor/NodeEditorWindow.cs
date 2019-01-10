@@ -56,9 +56,9 @@ namespace XNodeEditor {
             }
         }
 
-        public Dictionary<XNode.Node, Vector2> nodeSizes { get { return _nodeSizes; } }
-        private Dictionary<XNode.Node, Vector2> _nodeSizes = new Dictionary<XNode.Node, Vector2>();
-        public XNode.NodeGraph graph;
+        public Dictionary<XNode.INode, Vector2> nodeSizes { get { return _nodeSizes; } }
+        private Dictionary<XNode.INode, Vector2> _nodeSizes = new Dictionary<XNode.INode, Vector2>();
+        public XNode.INodeGraph graph;
         public Vector2 panOffset { get { return _panOffset; } set { _panOffset = value; Repaint(); } }
         private Vector2 _panOffset;
         public float zoom { get { return _zoom; } set { _zoom = Mathf.Clamp(value, 1f, 5f); Repaint(); } }
@@ -80,8 +80,8 @@ namespace XNodeEditor {
         }
 
         public void Save() {
-            if (AssetDatabase.Contains(graph)) {
-                EditorUtility.SetDirty(graph);
+            if (AssetDatabase.Contains(graph as UnityEngine.Object)) {
+                EditorUtility.SetDirty(graph as UnityEngine.Object);
                 if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
             } else SaveAs();
         }
@@ -92,8 +92,8 @@ namespace XNodeEditor {
             else {
                 XNode.NodeGraph existingGraph = AssetDatabase.LoadAssetAtPath<XNode.NodeGraph>(path);
                 if (existingGraph != null) AssetDatabase.DeleteAsset(path);
-                AssetDatabase.CreateAsset(graph, path);
-                EditorUtility.SetDirty(graph);
+                AssetDatabase.CreateAsset(graph as UnityEngine.Object, path);
+                EditorUtility.SetDirty(graph as UnityEngine.Object);
                 if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
             }
         }
@@ -128,23 +128,23 @@ namespace XNodeEditor {
             return new Vector2(xOffset, yOffset);
         }
 
-        public void SelectNode(XNode.Node node, bool add) {
+        public void SelectNode(XNode.INode node, bool add) {
             if (add) {
                 List<Object> selection = new List<Object>(Selection.objects);
-                selection.Add(node);
+                selection.Add(node as UnityEngine.Object);
                 Selection.objects = selection.ToArray();
-            } else Selection.objects = new Object[] { node };
+            } else Selection.objects = new Object[] { node as UnityEngine.Object };
         }
 
-        public void DeselectNode(XNode.Node node) {
+        public void DeselectNode(XNode.INode node) {
             List<Object> selection = new List<Object>(Selection.objects);
-            selection.Remove(node);
+            selection.Remove(node as UnityEngine.Object);
             Selection.objects = selection.ToArray();
         }
 
         [OnOpenAsset(0)]
         public static bool OnOpen(int instanceID, int line) {
-            XNode.NodeGraph nodeGraph = EditorUtility.InstanceIDToObject(instanceID) as XNode.NodeGraph;
+            XNode.INodeGraph nodeGraph = EditorUtility.InstanceIDToObject(instanceID) as XNode.INodeGraph;
             if (nodeGraph != null) {
                 NodeEditorWindow w = GetWindow(typeof(NodeEditorWindow), false, "xNode", true) as NodeEditorWindow;
                 w.wantsMouseMove = true;
@@ -152,6 +152,23 @@ namespace XNodeEditor {
                 return true;
             }
             return false;
+        }
+
+        [MenuItem("Window/XNode/OpenGraph with Selected")]
+        public static void OpenSelectedObject() {
+            if(Selection.activeGameObject != null) {
+                OpenWithGraph(Selection.activeGameObject.GetComponent<XNode.INodeGraph>());
+            } else {
+                OpenWithGraph(Selection.activeObject as XNode.INodeGraph);
+            }
+        }
+
+        public static void OpenWithGraph(XNode.INodeGraph nodeGraph) {
+            if (nodeGraph != null) {
+                NodeEditorWindow w = GetWindow(typeof(NodeEditorWindow), false, "xNode", true) as NodeEditorWindow;
+                w.wantsMouseMove = true;
+                w.graph = nodeGraph;
+            }
         }
 
         /// <summary> Repaint all open NodeEditorWindows. </summary>

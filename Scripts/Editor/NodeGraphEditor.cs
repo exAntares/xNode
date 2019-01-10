@@ -1,17 +1,21 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using UnityEditor;
 using UnityEngine;
+using XNode;
 
 namespace XNodeEditor {
     /// <summary> Base class to derive custom Node Graph editors from. Use this to override how graphs are drawn in the editor. </summary>
-    [CustomNodeGraphEditor(typeof(XNode.NodeGraph))]
-    public class NodeGraphEditor : XNodeEditor.Internal.NodeEditorBase<NodeGraphEditor, NodeGraphEditor.CustomNodeGraphEditorAttribute, XNode.NodeGraph> {
+    [CustomEditorAttribute(typeof(XNode.INodeGraph))]
+    public class NodeGraphEditor : XNodeEditor.Internal.NodeEditorBase<NodeGraphEditor, XNode.INodeGraph>, ICustomEditor<XNode.INodeGraph> {
         /// <summary> The position of the window in screen space. </summary>
         public Rect position;
         /// <summary> Are we currently renaming a node? </summary>
         protected bool isRenaming;
+
+        public INodeGraph Target { get; set; }
+        public SerializedObject SerializedObject { get; set; }
+
+        public UnityEngine.Object target { get { return Target as UnityEngine.Object; } }
 
         public virtual void OnGUI() { }
 
@@ -63,17 +67,16 @@ namespace XNodeEditor {
 
         /// <summary> Create a node and save it in the graph asset </summary>
         public virtual void CreateNode(Type type, Vector2 position) {
-            XNode.Node node = target.AddNode(type);
-            node.position = position;
-            node.name = UnityEditor.ObjectNames.NicifyVariableName(type.Name);
-            AssetDatabase.AddObjectToAsset(node, target);
+            INode node = Target.AddNode(type);
+            node.Position = position;
+            (node as UnityEngine.Object).name = UnityEditor.ObjectNames.NicifyVariableName(type.Name);
             if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
             NodeEditorWindow.RepaintAll();
         }
 
         /// <summary> Creates a copy of the original node in the graph </summary>
         public XNode.INode CopyNode(XNode.INode original) {
-            var node = target.CopyNode(original);
+            var node = Target.CopyNode(original);
             var nodeUnityObject = node as UnityEngine.Object;
             var originalUnityObject = original as UnityEngine.Object;
             nodeUnityObject.name = originalUnityObject.name;
@@ -85,26 +88,8 @@ namespace XNodeEditor {
         /// <summary> Safely remove a node and all its connections. </summary>
         public void RemoveNode(XNode.Node node) {
             UnityEngine.Object.DestroyImmediate(node, true);
-            target.RemoveNode(node);
+            Target.RemoveNode(node);
             if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
-        }
-
-        [AttributeUsage(AttributeTargets.Class)]
-        public class CustomNodeGraphEditorAttribute : Attribute,
-            XNodeEditor.Internal.NodeEditorBase<NodeGraphEditor, NodeGraphEditor.CustomNodeGraphEditorAttribute, XNode.NodeGraph>.INodeEditorAttrib {
-            private Type inspectedType;
-            public string editorPrefsKey;
-            /// <summary> Tells a NodeGraphEditor which Graph type it is an editor for </summary>
-            /// <param name="inspectedType">Type that this editor can edit</param>
-            /// <param name="editorPrefsKey">Define unique key for unique layout settings instance</param>
-            public CustomNodeGraphEditorAttribute(Type inspectedType, string editorPrefsKey = "xNode.Settings") {
-                this.inspectedType = inspectedType;
-                this.editorPrefsKey = editorPrefsKey;
-            }
-
-            public Type GetInspectedType() {
-                return inspectedType;
-            }
         }
     }
 }

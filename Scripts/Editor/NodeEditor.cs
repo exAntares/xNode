@@ -3,17 +3,20 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
+using XNode;
 
 namespace XNodeEditor {
     /// <summary> Base class to derive custom Node editors from. Use this to create your own custom inspectors and editors for your nodes. </summary>
-
-    [CustomNodeEditor(typeof(XNode.Node))]
-    public class NodeEditor : XNodeEditor.Internal.NodeEditorBase<NodeEditor, NodeEditor.CustomNodeEditorAttribute, XNode.Node> {
-
+    [CustomEditorAttribute(typeof(XNode.INode))]
+    public class NodeEditor : XNodeEditor.Internal.NodeEditorBase<NodeEditor, INode>, ICustomEditor<INode> {
         /// <summary> Fires every whenever a node was modified through the editor </summary>
         public static Action<XNode.INode> onUpdateNode;
         public static Dictionary<XNode.NodePort, Vector2> portPositions;
         public int renaming;
+
+        public INode Target { get; set; }
+        public SerializedObject SerializedObject { get; set; }
+        public UnityEngine.Object target { get { return Target as UnityEngine.Object; } }
 
         public virtual void OnHeaderGUI() {
             string title = target.name;
@@ -48,11 +51,11 @@ namespace XNodeEditor {
             // Unity specifically requires this to save/update any serial object.
             // serializedObject.Update(); must go at the start of an inspector gui, and
             // serializedObject.ApplyModifiedProperties(); goes at the end.
-            serializedObject.Update();
+            SerializedObject.Update();
             string[] excludes = { "m_Script", "graph", "position", "ports" };
             portPositions = new Dictionary<XNode.NodePort, Vector2>();
 
-            SerializedProperty iterator = serializedObject.GetIterator();
+            SerializedProperty iterator = SerializedObject.GetIterator();
             bool enterChildren = true;
             EditorGUIUtility.labelWidth = 84;
             while (iterator.NextVisible(enterChildren)) {
@@ -60,7 +63,7 @@ namespace XNodeEditor {
                 if (excludes.Contains(iterator.name)) continue;
                 NodeEditorGUILayout.PropertyField(iterator, true);
             }
-            serializedObject.ApplyModifiedProperties();
+            SerializedObject.ApplyModifiedProperties();
         }
 
         public virtual int GetWidth() {
@@ -108,21 +111,6 @@ namespace XNodeEditor {
         public void Rename(string newName) {
             target.name = newName;
             AssetDatabase.ImportAsset(AssetDatabase.GetAssetPath(target));
-        }
-
-        [AttributeUsage(AttributeTargets.Class)]
-        public class CustomNodeEditorAttribute : Attribute,
-        XNodeEditor.Internal.NodeEditorBase<NodeEditor, NodeEditor.CustomNodeEditorAttribute, XNode.Node>.INodeEditorAttrib {
-            private Type inspectedType;
-            /// <summary> Tells a NodeEditor which Node type it is an editor for </summary>
-            /// <param name="inspectedType">Type that this editor can edit</param>
-            public CustomNodeEditorAttribute(Type inspectedType) {
-                this.inspectedType = inspectedType;
-            }
-
-            public Type GetInspectedType() {
-                return inspectedType;
-            }
         }
     }
 }

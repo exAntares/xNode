@@ -37,16 +37,16 @@ namespace XNode {
         /// <summary> Iterate over all instance inputs on this node. </summary>
         public IEnumerable<NodePort> InstanceInputs { get { foreach (NodePort port in Ports) { if (port.IsDynamic && port.IsInput) yield return port; } } }
         /// <summary> Parent <see cref="NodeGraph"/> </summary>
-        [SerializeField] public NodeGraph graph;
+        [SerializeField] public MonoNodeGraph graph;
         /// <summary> Position on the <see cref="NodeGraph"/> </summary>
         [SerializeField] public Vector2 position;
         /// <summary> It is recommended not to modify these at hand. Instead, see <see cref="InputAttribute"/> and <see cref="OutputAttribute"/> </summary>
         [SerializeField] private NodePortDictionary ports = new NodePortDictionary();
 
         /// <summary> Used during node instantiation to fix null/misconfigured graph during OnEnable/Init. Set it before instantiating a node. Will automatically be unset during OnEnable </summary>
-        public static NodeGraph graphHotfix;
+        public static MonoNodeGraph graphHotfix;
 
-        public NodeGraph Graph { get { return graph; } }
+        public INodeGraph Graph { get { return graph; } }
         public Vector2 Position { get { return position; } set { position = value; } }
 
         protected void OnEnable() {

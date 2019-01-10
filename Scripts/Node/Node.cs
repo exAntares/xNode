@@ -46,7 +46,7 @@ namespace XNode {
         /// <summary> Used during node instantiation to fix null/misconfigured graph during OnEnable/Init. Set it before instantiating a node. Will automatically be unset during OnEnable </summary>
         public static NodeGraph graphHotfix;
 
-        public NodeGraph Graph { get { return graph; } }
+        public INodeGraph Graph { get { return graph; } }
         public Vector2 Position { get { return position; } set { position = value; } }
 
         protected void OnEnable() {
