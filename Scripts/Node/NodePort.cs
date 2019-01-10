@@ -28,7 +28,7 @@ namespace XNode {
         public bool IsOutput { get { return direction == IO.Output; } }
 
         public string fieldName { get { return _fieldName; } }
-        public Node node { get { return _node; } }
+        public INode node { get { return _node as INode; } }
         public bool IsDynamic { get { return _dynamic; } }
         public bool IsStatic { get { return !_dynamic; } }
         public Type ValueType {
@@ -44,7 +44,7 @@ namespace XNode {
         private Type valueType;
 
         [SerializeField] private string _fieldName;
-        [SerializeField] private Node _node;
+        [SerializeField] private UnityEngine.Object _node;
         [SerializeField] private string _typeQualifiedName;
         [SerializeField] private List<PortConnection> connections = new List<PortConnection>();
         [SerializeField] private IO _direction;
@@ -69,32 +69,41 @@ namespace XNode {
         }
 
         /// <summary> Copy a nodePort but assign it to another node. </summary>
-        public NodePort(NodePort nodePort, Node node) {
+        public NodePort(NodePort nodePort, INode node) {
             _fieldName = nodePort._fieldName;
             ValueType = nodePort.valueType;
             _direction = nodePort.direction;
             _dynamic = nodePort._dynamic;
             _connectionType = nodePort._connectionType;
-            _node = node;
+            var serializableNode = node as UnityEngine.Object;
+            if(serializableNode == null) {
+                throw new ArgumentNullException("Nodes should be UnityEngine Objects to be able to serialize");
+            }
+            _node = serializableNode;
         }
 
         /// <summary> Construct a dynamic port. Dynamic ports are not forgotten on reimport, and is ideal for runtime-created ports. </summary>
-        public NodePort(string fieldName, Type type, IO direction, ConnectionType connectionType, Node node) {
+        public NodePort(string fieldName, Type type, IO direction, ConnectionType connectionType, INode node) {
             _fieldName = fieldName;
             this.ValueType = type;
             _direction = direction;
-            _node = node;
             _dynamic = true;
             _connectionType = connectionType;
+            var serializableNode = node as UnityEngine.Object;
+            if (serializableNode == null) {
+                throw new ArgumentNullException("Nodes should be UnityEngine Objects to be able to serialize");
+            }
+            _node = serializableNode;
         }
 
         /// <summary> Checks all connections for invalid references, and removes them. </summary>
         public void VerifyConnections() {
             for (int i = connections.Count - 1; i >= 0; i--) {
-                if (connections[i].node != null &&
-                    !string.IsNullOrEmpty(connections[i].fieldName) &&
-                    connections[i].node.GetPort(connections[i].fieldName) != null)
+                PortConnection connection = connections[i];
+                INode castedNode = connection.node as INode;
+                if (castedNode != null && !string.IsNullOrEmpty(connection.fieldName) && castedNode.GetPort(connection.fieldName) != null) {
                     continue;
+                }
                 connections.RemoveAt(i);
             }
         }
@@ -217,7 +226,8 @@ namespace XNode {
                 connections.RemoveAt(i);
                 return null;
             }
-            NodePort port = connections[i].node.GetPort(connections[i].fieldName);
+            INode castedNode = connections[i].node as INode;
+            NodePort port = castedNode.GetPort(connections[i].fieldName);
             if (port == null) {
                 connections.RemoveAt(i);
                 return null;
@@ -344,17 +354,20 @@ namespace XNode {
         }
 
         /// <summary> Swap connected nodes from the old list with nodes from the new list </summary>
-        public void Redirect(List<Node> oldNodes, List<Node> newNodes) {
+        public void Redirect(List<INode> oldNodes, List<INode> newNodes) {
             foreach (PortConnection connection in connections) {
-                int index = oldNodes.IndexOf(connection.node);
-                if (index >= 0) connection.node = newNodes[index];
+                INode castedNode = connection.node as INode;
+                int index = oldNodes.IndexOf(castedNode);
+                if (index >= 0) {
+                    connection.node = newNodes[index] as UnityEngine.Object;
+                }
             }
         }
 
         [Serializable]
         private class PortConnection {
             [SerializeField] public string fieldName;
-            [SerializeField] public Node node;
+            [SerializeField] public UnityEngine.Object node;
             public NodePort Port { get { return port != null ? port : port = GetPort(); } }
 
             [NonSerialized] private NodePort port;
@@ -363,14 +376,15 @@ namespace XNode {
 
             public PortConnection(NodePort port) {
                 this.port = port;
-                node = port.node;
+                node = port.node as UnityEngine.Object;
                 fieldName = port.fieldName;
             }
 
             /// <summary> Returns the port that this <see cref="PortConnection"/> points to </summary>
             private NodePort GetPort() {
-                if (node == null || string.IsNullOrEmpty(fieldName)) return null;
-                return node.GetPort(fieldName);
+                INode castedNode = (node as INode);
+                if (castedNode == null || string.IsNullOrEmpty(fieldName)) return null;
+                return castedNode.GetPort(fieldName);
             }
         }
     }

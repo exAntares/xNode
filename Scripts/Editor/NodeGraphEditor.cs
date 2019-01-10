@@ -72,10 +72,12 @@ namespace XNodeEditor {
         }
 
         /// <summary> Creates a copy of the original node in the graph </summary>
-        public XNode.Node CopyNode(XNode.Node original) {
-            XNode.Node node = target.CopyNode(original);
-            node.name = original.name;
-            AssetDatabase.AddObjectToAsset(node, target);
+        public XNode.INode CopyNode(XNode.INode original) {
+            var node = target.CopyNode(original);
+            var nodeUnityObject = node as UnityEngine.Object;
+            var originalUnityObject = original as UnityEngine.Object;
+            nodeUnityObject.name = originalUnityObject.name;
+            AssetDatabase.AddObjectToAsset(nodeUnityObject, target);
             if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
             return node;
         }

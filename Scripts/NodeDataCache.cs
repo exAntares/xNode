@@ -10,7 +10,7 @@ namespace XNode {
         private static bool Initialized { get { return portDataCache != null; } }
 
         /// <summary> Update static ports to reflect class fields. </summary>
-        public static void UpdatePorts(Node node, Dictionary<string, NodePort> ports) {
+        public static void UpdatePorts(INode node, Dictionary<string, NodePort> ports) {
             if (!Initialized) BuildCache();
 
             Dictionary<string, NodePort> staticPorts = new Dictionary<string, NodePort>();

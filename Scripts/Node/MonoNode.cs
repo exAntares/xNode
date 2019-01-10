@@ -23,7 +23,7 @@ namespace XNode {
     /// </code>
     /// </example>
     [Serializable]
-    public abstract class Node : ScriptableObject, INode {
+    public abstract class MonoNode : MonoBehaviour, INode {
         /// <summary> Iterate over all ports on this node. </summary>
         public IEnumerable<NodePort> Ports { get { foreach (NodePort port in ports.Values) yield return port; } }
         /// <summary> Iterate over all outputs on this node. </summary>
@@ -69,7 +69,7 @@ namespace XNode {
             foreach (NodePort port in Ports) port.VerifyConnections();
         }
 
-#region Instance Ports
+        #region Instance Ports
         /// <summary> Convenience function. </summary>
         /// <seealso cref="AddInstancePort"/>
         /// <seealso cref="AddInstanceOutput"/>
@@ -122,9 +122,9 @@ namespace XNode {
                 RemoveInstancePort(port);
             }
         }
-#endregion
+        #endregion
 
-#region Ports
+        #region Ports
         /// <summary> Returns output port which matches fieldName </summary>
         public NodePort GetOutputPort(string fieldName) {
             NodePort port = GetPort(fieldName);
@@ -149,9 +149,9 @@ namespace XNode {
         public bool HasPort(string fieldName) {
             return ports.ContainsKey(fieldName);
         }
-#endregion
+        #endregion
 
-#region Inputs/Outputs
+        #region Inputs/Outputs
         /// <summary> Return input value for a specified port. Returns fallback value if no ports are connected </summary>
         /// <param name="fieldName">Field name of requested input port</param>
         /// <param name="fallback">If no ports are connected, this value will be returned</param>
@@ -176,7 +176,7 @@ namespace XNode {
             Debug.LogWarning("No GetValue(NodePort port) override defined for " + GetType());
             return null;
         }
-#endregion
+        #endregion
 
         /// <summary> Called after a connection between two <see cref="NodePort"/>s is created </summary>
         /// <param name="from">Output</param> <param name="to">Input</param>

@@ -156,7 +156,7 @@ namespace XNodeEditor {
                             } else {
                                 hoveredPort.VerifyConnections();
                                 if (hoveredPort.IsConnected) {
-                                    XNode.Node node = hoveredPort.node;
+                                    var node = hoveredPort.node;
                                     XNode.NodePort output = hoveredPort.Connection;
                                     int outputConnectionIndex = output.GetConnectionIndex(hoveredPort);
                                     draggedOutputReroutes = output.GetReroutePoints(outputConnectionIndex);
@@ -207,7 +207,7 @@ namespace XNodeEditor {
                         if (IsDraggingPort) {
                             //If connection is valid, save it
                             if (draggedOutputTarget != null) {
-                                XNode.Node node = draggedOutputTarget.node;
+                                var node = draggedOutputTarget.node;
                                 if (graph.nodes.Count != 0) draggedOutput.Connect(draggedOutputTarget);
 
                                 // ConnectionIndex can be -1 if the connection is removed instantly after creation
@@ -365,15 +365,15 @@ namespace XNodeEditor {
         /// <summary> Duplicate selected nodes and select the duplicates </summary>
         public void DuplicateSelectedNodes() {
             UnityEngine.Object[] newNodes = new UnityEngine.Object[Selection.objects.Length];
-            Dictionary<XNode.Node, XNode.Node> substitutes = new Dictionary<XNode.Node, XNode.Node>();
+            Dictionary<XNode.INode, XNode.INode> substitutes = new Dictionary<XNode.INode, XNode.INode>();
             for (int i = 0; i < Selection.objects.Length; i++) {
-                if (Selection.objects[i] is XNode.Node) {
-                    XNode.Node srcNode = Selection.objects[i] as XNode.Node;
-                    if (srcNode.graph != graph) continue; // ignore nodes selected in another graph
-                    XNode.Node newNode = graphEditor.CopyNode(srcNode);
+                if (Selection.objects[i] is XNode.INode) {
+                    var srcNode = Selection.objects[i] as XNode.INode;
+                    if (srcNode.Graph != graph) continue; // ignore nodes selected in another graph
+                    XNode.INode newNode = graphEditor.CopyNode(srcNode);
                     substitutes.Add(srcNode, newNode);
-                    newNode.position = srcNode.position + new Vector2(30, 30);
-                    newNodes[i] = newNode;
+                    newNode.Position = srcNode.Position + new Vector2(30, 30);
+                    newNodes[i] = newNode as UnityEngine.Object;
                 }
             }
 
@@ -387,7 +387,7 @@ namespace XNodeEditor {
                             XNode.NodePort inputPort = port.direction == XNode.NodePort.IO.Input ? port : port.GetConnection(c);
                             XNode.NodePort outputPort = port.direction == XNode.NodePort.IO.Output ? port : port.GetConnection(c);
 
-                            XNode.Node newNodeIn, newNodeOut;
+                            XNode.INode newNodeIn, newNodeOut;
                             if (substitutes.TryGetValue(inputPort.node, out newNodeIn) && substitutes.TryGetValue(outputPort.node, out newNodeOut)) {
                                 newNodeIn.UpdateStaticPorts();
                                 newNodeOut.UpdateStaticPorts();

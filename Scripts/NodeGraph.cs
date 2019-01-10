@@ -26,9 +26,14 @@ namespace XNode {
         }
 
         /// <summary> Creates a copy of the original node in the graph </summary>
-        public virtual Node CopyNode(Node original) {
+        public virtual INode CopyNode(INode original) {
+            Node castedNode = original as Node;
+            if(castedNode == null) {
+                throw new ArgumentException("NodeGraph can only copy nodes scriptable objects");
+            }
+
             Node.graphHotfix = this;
-            Node node = ScriptableObject.Instantiate(original);
+            Node node = ScriptableObject.Instantiate(castedNode);
             node.graph = this;
             node.ClearConnections();
             nodes.Add(node);
@@ -66,11 +71,14 @@ namespace XNode {
                 graph.nodes[i] = node;
             }
 
+            var oldNodes = new List<INode>(nodes);
+            var newNodes = new List<INode>(graph.nodes);
+
             // Redirect all connections
             for (int i = 0; i < graph.nodes.Count; i++) {
                 if (graph.nodes[i] == null) continue;
                 foreach (NodePort port in graph.nodes[i].Ports) {
-                    port.Redirect(nodes, graph.nodes);
+                    port.Redirect(oldNodes, newNodes);
                 }
             }
 

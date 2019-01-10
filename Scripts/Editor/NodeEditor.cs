@@ -11,7 +11,7 @@ namespace XNodeEditor {
     public class NodeEditor : XNodeEditor.Internal.NodeEditorBase<NodeEditor, NodeEditor.CustomNodeEditorAttribute, XNode.Node> {
 
         /// <summary> Fires every whenever a node was modified through the editor </summary>
-        public static Action<XNode.Node> onUpdateNode;
+        public static Action<XNode.INode> onUpdateNode;
         public static Dictionary<XNode.NodePort, Vector2> portPositions;
         public int renaming;
 
