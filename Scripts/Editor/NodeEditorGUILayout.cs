@@ -24,7 +24,7 @@ namespace XNodeEditor {
         /// <summary> Make a field for a serialized property. Automatically displays relevant node port. </summary>
         public static void PropertyField(SerializedProperty property, GUIContent label, bool includeChildren = true, params GUILayoutOption[] options) {
             if (property == null) throw new NullReferenceException();
-            XNode.Node node = property.serializedObject.targetObject as XNode.Node;
+            XNode.INode node = property.serializedObject.targetObject as XNode.INode;
             XNode.NodePort port = node.GetPort(property.name);
             PropertyField(property, label, port, includeChildren);
         }
@@ -267,7 +267,7 @@ namespace XNodeEditor {
         /// <param name="serializedObject">The serializedObject of the node</param>
         /// <param name="connectionType">Connection type of added instance ports</param>
         public static void InstancePortList(string fieldName, Type type, SerializedObject serializedObject, XNode.NodePort.IO io, XNode.ConnectionType connectionType = XNode.ConnectionType.Multiple) {
-            XNode.Node node = serializedObject.targetObject as XNode.Node;
+            var node = serializedObject.targetObject as XNode.INode;
             SerializedProperty arrayData = serializedObject.FindProperty(fieldName);
 
             Predicate<string> isMatchingInstancePort =
@@ -297,7 +297,7 @@ namespace XNodeEditor {
         private static ReorderableList CreateReorderableList(List<XNode.NodePort> instancePorts, SerializedProperty arrayData, Type type, SerializedObject serializedObject, XNode.NodePort.IO io, string label, XNode.ConnectionType connectionType = XNode.ConnectionType.Multiple) {
             bool hasArrayData = arrayData != null && arrayData.isArray;
             int arraySize = hasArrayData ? arrayData.arraySize : 0;
-            XNode.Node node = serializedObject.targetObject as XNode.Node;
+            var node = serializedObject.targetObject as XNode.INode;
             ReorderableList list = new ReorderableList(instancePorts, null, true, true, true, true);
 
             list.drawElementCallback =
@@ -384,7 +384,7 @@ namespace XNodeEditor {
                     if (io == XNode.NodePort.IO.Output) node.AddInstanceOutput(type, connectionType, newName);
                     else node.AddInstanceInput(type, connectionType, newName);
                     serializedObject.Update();
-                    EditorUtility.SetDirty(node);
+                    EditorUtility.SetDirty(node as UnityEngine.Object);
                     if (hasArrayData) arrayData.InsertArrayElementAtIndex(arraySize);
                     serializedObject.ApplyModifiedProperties();
                 };
@@ -404,7 +404,7 @@ namespace XNodeEditor {
                     // Remove the last instance port, to avoid messing up the indexing
                     node.RemoveInstancePort(instancePorts[instancePorts.Count() - 1].fieldName);
                     serializedObject.Update();
-                    EditorUtility.SetDirty(node);
+                    EditorUtility.SetDirty(node as UnityEngine.Object);
                     if (hasArrayData) {
                         arrayData.DeleteArrayElementAtIndex(index);
                         arraySize--;
@@ -430,7 +430,7 @@ namespace XNodeEditor {
                     while (node.HasPort(newName)) newName = arrayData.name + " " + (++i);
                     if (io == XNode.NodePort.IO.Output) node.AddInstanceOutput(type, connectionType, newName);
                     else node.AddInstanceInput(type, connectionType, newName);
-                    EditorUtility.SetDirty(node);
+                    EditorUtility.SetDirty(node as UnityEngine.Object);
                     instancePortCount++;
                 }
                 while (arraySize < instancePortCount) {

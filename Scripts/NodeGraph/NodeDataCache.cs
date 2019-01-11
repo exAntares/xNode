@@ -46,7 +46,7 @@ namespace XNode {
 
         private static void BuildCache() {
             portDataCache = new PortDataCache();
-            System.Type baseType = typeof(Node);
+            System.Type baseType = typeof(INode);
             List<System.Type> nodeTypes = new List<System.Type>();
             System.Reflection.Assembly[] assemblies = System.AppDomain.CurrentDomain.GetAssemblies();
             Assembly selfAssembly = Assembly.GetAssembly(baseType);

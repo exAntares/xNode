@@ -90,7 +90,7 @@ namespace XNodeEditor {
             string path = EditorUtility.SaveFilePanelInProject("Save NodeGraph", "NewNodeGraph", "asset", "");
             if (string.IsNullOrEmpty(path)) return;
             else {
-                XNode.NodeGraph existingGraph = AssetDatabase.LoadAssetAtPath<XNode.NodeGraph>(path);
+                XNode.INodeGraph existingGraph = AssetDatabase.LoadAssetAtPath<Object>(path) as XNode.INodeGraph;
                 if (existingGraph != null) AssetDatabase.DeleteAsset(path);
                 AssetDatabase.CreateAsset(graph as UnityEngine.Object, path);
                 EditorUtility.SetDirty(graph as UnityEngine.Object);

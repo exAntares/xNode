@@ -87,8 +87,8 @@ namespace XNodeEditor {
         /// <summary> Add items for the context menu when right-clicking this node. Override to add custom menu items. </summary>
         public virtual void AddContextMenuItems(GenericMenu menu) {
             // Actions if only one node is selected
-            if (Selection.objects.Length == 1 && Selection.activeObject is XNode.Node) {
-                XNode.Node node = Selection.activeObject as XNode.Node;
+            if (Selection.objects.Length == 1 && Selection.activeObject is XNode.INode) {
+                XNode.INode node = Selection.activeObject as XNode.INode;
                 menu.AddItem(new GUIContent("Move To Top"), false, () => NodeEditorWindow.current.MoveNodeToTop(node));
                 menu.AddItem(new GUIContent("Rename"), false, NodeEditorWindow.current.RenameSelectedNode);
             }
@@ -98,8 +98,8 @@ namespace XNodeEditor {
             menu.AddItem(new GUIContent("Remove"), false, NodeEditorWindow.current.RemoveSelectedNodes);
 
             // Custom sctions if only one node is selected
-            if (Selection.objects.Length == 1 && Selection.activeObject is XNode.Node) {
-                XNode.Node node = Selection.activeObject as XNode.Node;
+            if (Selection.objects.Length == 1 && Selection.activeObject is XNode.INode) {
+                XNode.INode node = Selection.activeObject as XNode.INode;
                 NodeEditorWindow.AddCustomContextMenuItems(menu, node);
             }
         }

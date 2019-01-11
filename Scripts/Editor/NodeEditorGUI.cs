@@ -244,7 +244,7 @@ namespace XNodeEditor {
             //Active node is hashed before and after node GUI to detect changes
             int nodeHash = 0;
             System.Reflection.MethodInfo onValidate = null;
-            if (Selection.activeObject != null && Selection.activeObject is XNode.Node) {
+            if (Selection.activeObject != null && Selection.activeObject is XNode.INode) {
                 onValidate = Selection.activeObject.GetType().GetMethod("OnValidate");
                 if (onValidate != null) nodeHash = Selection.activeObject.GetHashCode();
             }

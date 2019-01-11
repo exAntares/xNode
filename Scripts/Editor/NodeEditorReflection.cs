@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -36,7 +35,7 @@ namespace XNodeEditor {
 
         public static Type[] GetNodeTypes() {
             //Get all classes deriving from Node via reflection
-            return GetDerivedTypes(typeof(XNode.Node));
+            return GetDerivedTypes(typeof(XNode.INode));
         }
 
         public static Dictionary<Type, Color> GetNodeTint() {
