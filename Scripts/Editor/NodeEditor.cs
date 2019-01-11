@@ -19,7 +19,7 @@ namespace XNodeEditor {
         public UnityEngine.Object target { get { return Target as UnityEngine.Object; } }
 
         public virtual void OnHeaderGUI() {
-            string title = target.name;
+            string title = Target.Name;
             if (renaming != 0) { 
                 if (Selection.Contains(target)) {
                     int controlID = EditorGUIUtility.GetControlID(FocusType.Keyboard) + 1;
@@ -28,7 +28,7 @@ namespace XNodeEditor {
                         EditorGUIUtility.editingTextField = true;
                         renaming = 2;
                     }
-                    target.name = EditorGUILayout.TextField(target.name, NodeEditorResources.styles.nodeHeader, GUILayout.Height(30));
+                    Target.Name = EditorGUILayout.TextField(Target.Name, NodeEditorResources.styles.nodeHeader, GUILayout.Height(30));
                     if (!EditorGUIUtility.editingTextField) {
                         Debug.Log("Finish renaming");
                         Rename(target.name);
@@ -38,7 +38,7 @@ namespace XNodeEditor {
                 else {
                     // Selection changed, so stop renaming.
                     GUILayout.Label(title, NodeEditorResources.styles.nodeHeader, GUILayout.Height(30));
-                    Rename(target.name);
+                    Rename(Target.Name);
                     renaming = 0;
                 }
             } else {
@@ -109,7 +109,7 @@ namespace XNodeEditor {
         }
 
         public void Rename(string newName) {
-            target.name = newName;
+            Target.Name = newName;
             AssetDatabase.ImportAsset(AssetDatabase.GetAssetPath(target));
         }
     }

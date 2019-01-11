@@ -39,6 +39,7 @@ namespace XNode {
         public virtual INode AddNode(Type type) {
             MonoNode.graphHotfix = this;
             MonoNode node = gameObject.AddComponent(type) as MonoNode;
+            node.OnEnable();
             node.graph = this;
             nodes.Add(node);
             return node;

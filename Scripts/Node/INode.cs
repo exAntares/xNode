@@ -4,6 +4,7 @@ using UnityEngine;
 
 namespace XNode {
     public interface INode {
+        string Name { get; set; }
         INodeGraph Graph { get; }
         Vector2 Position { get; set; }
         object GetValue(NodePort port);

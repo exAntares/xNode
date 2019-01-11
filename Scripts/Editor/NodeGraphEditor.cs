@@ -69,7 +69,7 @@ namespace XNodeEditor {
         public virtual void CreateNode(Type type, Vector2 position) {
             INode node = Target.AddNode(type);
             node.Position = position;
-            (node as UnityEngine.Object).name = UnityEditor.ObjectNames.NicifyVariableName(type.Name);
+            node.Name = UnityEditor.ObjectNames.NicifyVariableName(type.Name);
             if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
             NodeEditorWindow.RepaintAll();
         }
@@ -79,7 +79,7 @@ namespace XNodeEditor {
             var node = Target.CopyNode(original);
             var nodeUnityObject = node as UnityEngine.Object;
             var originalUnityObject = original as UnityEngine.Object;
-            nodeUnityObject.name = originalUnityObject.name;
+            node.Name = original.Name;
             AssetDatabase.AddObjectToAsset(nodeUnityObject, target);
             if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
             return node;

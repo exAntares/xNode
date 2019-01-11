@@ -29,7 +29,7 @@ namespace XNodeEditor {
                     if (node.GetType () == scriptType) {
                         if (node != null && node.Graph != null) {
                             // Delete the node and notify the user
-                            Debug.LogWarning (node.GetType().Name + " of " + node.Graph + " depended on deleted script and has been removed automatically.", node.Graph as UnityEngine.Object);
+                            Debug.LogWarning (node.Name + " of " + node.Graph + " depended on deleted script and has been removed automatically.", node.Graph as UnityEngine.Object);
                             node.Graph.RemoveNode (node);
                         }
                     }

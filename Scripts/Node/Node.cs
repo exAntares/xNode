@@ -48,6 +48,7 @@ namespace XNode {
 
         public INodeGraph Graph { get { return graph; } }
         public Vector2 Position { get { return position; } set { position = value; } }
+        public string Name { get { return name; } set { name = value; } }
 
         protected void OnEnable() {
             if (graphHotfix != null) graph = graphHotfix;
