@@ -171,6 +171,14 @@ namespace XNodeEditor {
             }
         }
 
+        void OnSelectionChange() {
+            if (Selection.activeGameObject != null) {
+                OpenWithGraph(Selection.activeGameObject.GetComponent<XNode.INodeGraph>());
+            } else {
+                OpenWithGraph(Selection.activeObject as XNode.INodeGraph);
+            }
+        }
+
         /// <summary> Repaint all open NodeEditorWindows. </summary>
         public static void RepaintAll() {
             NodeEditorWindow[] windows = Resources.FindObjectsOfTypeAll<NodeEditorWindow>();
