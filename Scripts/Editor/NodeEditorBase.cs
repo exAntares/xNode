@@ -23,7 +23,9 @@ namespace XNodeEditor.Internal {
 				editor.SerializedObject = new SerializedObject(target as UnityEngine.Object);
 				editors.Add(target as UnityEngine.Object, editor);
 			}
-			if (editor.Target == null) editor.Target = target;
+            if ((editor.Target as UnityEngine.Object) == null) {
+                editor.Target = target;
+            }
 			if (editor.SerializedObject == null) editor.SerializedObject = new SerializedObject(target as UnityEngine.Object);
 			return editor;
 		}
