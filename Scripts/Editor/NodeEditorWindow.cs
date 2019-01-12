@@ -32,6 +32,8 @@ namespace XNodeEditor {
         }
 
         private void OnDisable() {
+            EditorApplication.playModeStateChanged -= LogPlayModeState;
+
             // Cache portConnectionPoints before serialization starts
             int count = portConnectionPoints.Count;
             _references = new NodePortReference[count];
@@ -45,6 +47,8 @@ namespace XNodeEditor {
         }
 
         private void OnEnable() {
+            EditorApplication.playModeStateChanged += LogPlayModeState;
+
             // Reload portConnectionPoints if there are any
             int length = _references.Length;
             if (length == _rects.Length) {
@@ -171,7 +175,7 @@ namespace XNodeEditor {
             }
         }
 
-        void OnSelectionChange() {
+        private void OnSelectionChange() {
             if (Selection.activeGameObject != null) {
                 OpenWithGraph(Selection.activeGameObject.GetComponent<XNode.INodeGraph>());
             } else {
@@ -184,6 +188,12 @@ namespace XNodeEditor {
             NodeEditorWindow[] windows = Resources.FindObjectsOfTypeAll<NodeEditorWindow>();
             for (int i = 0; i < windows.Length; i++) {
                 windows[i].Repaint();
+            }
+        }
+
+        private void LogPlayModeState(PlayModeStateChange state) {
+            if(state == PlayModeStateChange.EnteredPlayMode || state == PlayModeStateChange.EnteredEditMode) {
+                OnSelectionChange();
             }
         }
     }
