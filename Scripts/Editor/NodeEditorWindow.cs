@@ -169,18 +169,14 @@ namespace XNodeEditor {
 
         public static void OpenWithGraph(XNode.INodeGraph nodeGraph) {
             if (nodeGraph != null) {
-                NodeEditorWindow w = GetWindow(typeof(NodeEditorWindow), false, "xNode", true) as NodeEditorWindow;
+                NodeEditorWindow w = GetWindow(typeof(NodeEditorWindow), false, "xNode", false) as NodeEditorWindow;
                 w.wantsMouseMove = true;
                 w.graph = nodeGraph;
             }
         }
 
         private void OnSelectionChange() {
-            if (Selection.activeGameObject != null) {
-                OpenWithGraph(Selection.activeGameObject.GetComponent<XNode.INodeGraph>());
-            } else {
-                OpenWithGraph(Selection.activeObject as XNode.INodeGraph);
-            }
+            OpenSelectedObject();
         }
 
         /// <summary> Repaint all open NodeEditorWindows. </summary>
@@ -191,9 +187,9 @@ namespace XNodeEditor {
             }
         }
 
-        private void LogPlayModeState(PlayModeStateChange state) {
+        private static void LogPlayModeState(PlayModeStateChange state) {
             if(state == PlayModeStateChange.EnteredPlayMode || state == PlayModeStateChange.EnteredEditMode) {
-                OnSelectionChange();
+                OpenSelectedObject();
             }
         }
     }
