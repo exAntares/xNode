@@ -30,6 +30,7 @@ namespace XNodeEditor {
             [SerializeField] private string typeColorsData = "";
             [NonSerialized] public Dictionary<string, Color> typeColors = new Dictionary<string, Color>();
             public NoodleType noodleType = NoodleType.Curve;
+            public Texture2D NodeTexture;
 
             private Texture2D _gridTexture;
             public Texture2D gridTexture {
@@ -124,6 +125,7 @@ namespace XNodeEditor {
             EditorGUILayout.LabelField("Node", EditorStyles.boldLabel);
             settings.highlightColor = EditorGUILayout.ColorField("Selection", settings.highlightColor);
             settings.noodleType = (NoodleType) EditorGUILayout.EnumPopup("Noodle type", (Enum) settings.noodleType);
+            settings.NodeTexture = EditorGUILayout.ObjectField(nameof(Settings.NodeTexture), settings.NodeTexture, typeof(Texture2D), false) as Texture2D;
             if (GUI.changed) {
                 SavePrefs(key, settings);
                 NodeEditorWindow.RepaintAll();
