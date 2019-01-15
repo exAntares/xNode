@@ -38,24 +38,5 @@ namespace XNodeEditor {
             // We didn't actually delete the script. Tell the internal system to carry on with normal deletion procedure
             return AssetDeleteResult.DidNotDelete;
         }
-
-        /// <summary> Automatically re-add loose node assets to the Graph node list </summary>
-        [InitializeOnLoadMethod]
-        private static void OnReloadEditor () {
-            /*
-            // Find all NodeGraph assets
-            string[] guids = AssetDatabase.FindAssets ("t:" + typeof (XNode.INodeGraph));
-            for (int i = 0; i < guids.Length; i++) {
-                string assetpath = AssetDatabase.GUIDToAssetPath (guids[i]);
-                XNode.INodeGraph graph = AssetDatabase.LoadAssetAtPath (assetpath, typeof (XNode.INodeGraph)) as XNode.INodeGraph;
-                graph.nodes.RemoveAll(x => x == null); //Remove null items
-                Object[] objs = AssetDatabase.LoadAllAssetRepresentationsAtPath (assetpath);
-                // Ensure that all sub node assets are present in the graph node list
-                for (int u = 0; u < objs.Length; u++) {
-                    if (!graph.GetNodes().Contains (objs[u] as XNode.Node)) graph.nodes.Add(objs[u] as XNode.INode);
-                }
-            }
-            */
-        }
     }
 }
