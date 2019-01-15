@@ -5,16 +5,16 @@ using UnityEngine;
 namespace XNode {
     /// <summary> Base class for all node graphs </summary>
     [Serializable]
-    public class MonoNodeGraph : MonoBehaviour, INodeGraph {
+    public class MonoNodeGraph : MonoBehaviour, INodeGraph, ISerializationCallbackReceiver {
         /// <summary> All nodes in the graph. <para/>
         /// See: <see cref="AddNode{T}"/> </summary>
-        [SerializeField] public List<MonoNode> nodes = new List<MonoNode>();
+        [SerializeField] public MonoNode[] nodes;
 
-        public int NodesCount { get { return nodes.Count; } }
+        public int NodesCount { get { return nodes.Length; } }
 
         public INode[] GetNodes() {
-            var result = new INode[nodes.Count];
-            for (int i = 0; i < nodes.Count; i++) {
+            var result = new INode[nodes.Length];
+            for (int i = 0; i < nodes.Length; i++) {
                 result[i] = nodes[i];
             }
             return result;
@@ -29,7 +29,7 @@ namespace XNode {
         public void MoveNodeToTop(INode node) {
             var castedNode = node as MonoNode;
             int index;
-            while ((index = nodes.IndexOf(castedNode)) != NodesCount - 1) {
+            while ((index = Array.IndexOf(nodes, castedNode)) != NodesCount - 1) {
                 nodes[index] = nodes[index + 1];
                 nodes[index + 1] = castedNode;
             }
@@ -41,7 +41,9 @@ namespace XNode {
             MonoNode node = gameObject.AddComponent(type) as MonoNode;
             node.OnEnable();
             node.graph = this;
-            nodes.Add(node);
+            var nodesList = new List<MonoNode>(nodes);
+            nodesList.Add(node);
+            nodes = nodesList.ToArray();
             return node;
         }
 
@@ -56,7 +58,9 @@ namespace XNode {
             MonoNode node = gameObject.AddComponent(original.GetType()) as MonoNode;
             node.graph = this;
             node.ClearConnections();
-            nodes.Add(node);
+            var nodesList = new List<MonoNode>(nodes);
+            nodesList.Add(node);
+            nodes = nodesList.ToArray();
             return node;
         }
 
@@ -64,18 +68,20 @@ namespace XNode {
         /// <param name="node"> The node to remove </param>
         public void RemoveNode(INode node) {
             node.ClearConnections();
-            nodes.Remove(node as MonoNode);
+            var nodesList = new List<MonoNode>(nodes);
+            nodesList.Remove(node as MonoNode);
+            nodes = nodesList.ToArray();
             if (Application.isPlaying) Destroy(node as UnityEngine.Object);
         }
 
         /// <summary> Remove all nodes and connections from the graph </summary>
         public void Clear() {
             if (Application.isPlaying) {
-                for (int i = 0; i < nodes.Count; i++) {
+                for (int i = 0; i < nodes.Length; i++) {
                     Destroy(nodes[i]);
                 }
             }
-            nodes.Clear();
+            nodes = new MonoNode[0];
         }
 
         /// <summary> Create a new deep copy of this graph </summary>
@@ -88,6 +94,13 @@ namespace XNode {
         private void OnDestroy() {
             // Remove all nodes prior to graph destruction
             Clear();
+        }
+
+        public void OnBeforeSerialize() {
+            nodes = GetComponents<MonoNode>();
+        }
+
+        public void OnAfterDeserialize() {
         }
     }
 }

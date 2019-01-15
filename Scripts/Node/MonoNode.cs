@@ -174,10 +174,7 @@ namespace XNode {
 
         /// <summary> Returns a value based on requested port output. Should be overridden in all derived nodes with outputs. </summary>
         /// <param name="port">The requested port.</param>
-        public virtual object GetValue(NodePort port) {
-            Debug.LogWarning("No GetValue(NodePort port) override defined for " + GetType());
-            return null;
-        }
+        public abstract object GetValue(NodePort port);
         #endregion
 
         /// <summary> Called after a connection between two <see cref="NodePort"/>s is created </summary>
