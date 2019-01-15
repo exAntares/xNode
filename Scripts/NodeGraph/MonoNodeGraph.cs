@@ -99,7 +99,7 @@ namespace XNode {
         public void OnBeforeSerialize() {
             nodes = GetComponents<MonoNode>();
             for (int i = 0; i < nodes.Length; i++) {
-                nodes[i].OnEnable();
+                nodes[i].UpdateStaticPorts();
             }
         }
 
