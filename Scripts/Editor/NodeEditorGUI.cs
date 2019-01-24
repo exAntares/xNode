@@ -62,8 +62,7 @@ namespace XNodeEditor {
             
             foreach (var availableNodeType in typeNames) {
                 if (GUILayout.Button(Path.GetFileName(availableNodeType.name), GUILayout.Height(50))) {
-                    Vector2 pos = NodeEditorWindow.current.WindowToGridPosition(Event.current.mousePosition);
-                    graphEditor.CreateNode(availableNodeType.type, contextWindowRect.center);
+                    graphEditor.CreateNode(availableNodeType.type, Vector2.zero);
                     currentActivity = NodeActivity.Idle;
                     Repaint();
                 }
