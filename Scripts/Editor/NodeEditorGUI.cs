@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
@@ -13,6 +14,10 @@ namespace XNodeEditor {
         private int topPadding { get { return isDocked() ? 19 : 22; } }
         /// <summary> Executed after all other window GUI. Useful if Zoom is ruining your day. Automatically resets after being run.</summary>
         public event Action onLateGUI;
+
+        private string _searchText = "Search";
+        private Rect contextWindowRect;
+        private Vector2 contextMenuMousePos;
 
         private void OnGUI() {
             Event e = Event.current;
@@ -31,6 +36,14 @@ namespace XNodeEditor {
             DrawTooltip();
             graphEditor.OnGUI();
 
+            if (currentActivity == NodeActivity.AddingNode) {
+                BeginWindows();
+                contextWindowRect = new Rect(contextMenuMousePos, Vector2.one * 200);
+                // All GUI.Window or GUILayout.Window must come inside here
+                contextWindowRect = GUILayout.Window(1, contextWindowRect, DrawWindow, "Actions");
+                EndWindows();
+            }
+
             // Run and reset onLateGUI
             if (onLateGUI != null) {
                 onLateGUI();
@@ -38,6 +51,48 @@ namespace XNodeEditor {
             }
 
             GUI.matrix = m;
+        }
+
+        // The window function. This works just like ingame GUI.Window
+        private void DrawWindow(int unusedWindowID) {
+            _searchText = GUILayout.TextField(_searchText);
+            var typeNames = nodeTypes.Select(x => new { type = x, name = GetNodeMenuName(x), tags = GetNodeMenuTags(x) })
+                .Where(x => !string.IsNullOrEmpty(x.tags.Union(new[] { x.name }).FirstOrDefault(tag => tag.ToLower().Contains(_searchText.ToLower()))))
+                .ToArray();
+            
+            foreach (var availableNodeType in typeNames) {
+                if (GUILayout.Button(Path.GetFileName(availableNodeType.name))) {
+                    Vector2 pos = NodeEditorWindow.current.WindowToGridPosition(Event.current.mousePosition);
+                    graphEditor.CreateNode(availableNodeType.type, contextWindowRect.center);
+                    currentActivity = NodeActivity.Idle;
+                    Repaint();
+                }
+            }
+
+            if (GUILayout.Button("Preferences")) {
+                NodeEditorWindow.OpenPreferences();
+                currentActivity = NodeActivity.Idle;
+                Repaint();
+            }
+            GUI.DragWindow();
+        }
+
+        public static string GetNodeMenuName(Type type) {
+            //Check if type has the CreateNodeMenuAttribute
+            XNode.CreateNodeMenuAttribute attrib;
+            if (NodeEditorUtilities.GetAttrib(type, out attrib)) // Return custom path
+                return attrib.menuName;
+            else // Return generated path
+                return ObjectNames.NicifyVariableName(type.ToString().Replace('.', '/'));
+        }
+
+        public static string[] GetNodeMenuTags(Type type) {
+            //Check if type has the CreateNodeMenuAttribute
+            XNode.CreateNodeMenuAttribute attrib;
+            if (NodeEditorUtilities.GetAttrib(type, out attrib)) {// Return custom path
+                return attrib.Tags;
+            }
+            return new string[0];
         }
 
         public static void BeginZoomed(Rect rect, float zoom, float topPadding) {

@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace XNodeEditor {
     public partial class NodeEditorWindow {
-        public enum NodeActivity { Idle, HoldNode, DragNode, HoldGrid, DragGrid }
+        public enum NodeActivity { Idle, HoldNode, DragNode, HoldGrid, DragGrid, AddingNode }
         public static NodeActivity currentActivity = NodeActivity.Idle;
         public static bool isPanning { get; private set; }
         public static Vector2[] dragOffset;
@@ -146,6 +146,11 @@ namespace XNodeEditor {
                     }
                     break;
                 case EventType.MouseDown:
+                    if (currentActivity == NodeActivity.AddingNode && contextWindowRect.Contains(Event.current.mousePosition)) {
+                        break;
+                    } else {
+                        currentActivity = NodeActivity.Idle;
+                    }
                     Repaint();
                     if (e.button == 0) {
                         draggedOutputReroutes.Clear();
@@ -202,6 +207,10 @@ namespace XNodeEditor {
                     }
                     break;
                 case EventType.MouseUp:
+                    if (currentActivity == NodeActivity.AddingNode && contextWindowRect.Contains(Event.current.mousePosition)) {
+                        break;
+                    }
+
                     if (e.button == 0) {
                         //Port drag release
                         if (IsDraggingPort) {
@@ -266,9 +275,12 @@ namespace XNodeEditor {
                                 NodeEditor.GetEditor(hoveredNode).AddContextMenuItems(menu);
                                 menu.DropDown(new Rect(Event.current.mousePosition, Vector2.zero));
                             } else if (!IsHoveringNode) {
-                                GenericMenu menu = new GenericMenu();
-                                graphEditor.AddContextMenuItems(menu);
-                                menu.DropDown(new Rect(Event.current.mousePosition, Vector2.zero));
+                                contextMenuMousePos = Event.current.mousePosition;
+                                currentActivity = NodeActivity.AddingNode;
+                                Repaint();
+                                //GenericMenu menu = new GenericMenu();
+                                //graphEditor.AddContextMenuItems(menu);
+                                //menu.DropDown(new Rect(Event.current.mousePosition, Vector2.zero));
                             }
                         }
                         isPanning = false;
