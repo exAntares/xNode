@@ -58,6 +58,11 @@ namespace XNodeEditor {
                     if (NodeEditorPreferences.GetSettings().zoomToMouse) panOffset += (1 - oldZoom / zoom) * (WindowToGridPosition(e.mousePosition) + panOffset);
                     break;
                 case EventType.MouseDrag:
+                    if (e.button == 0 && e.alt) {
+                        SetupPanning(e);
+                        break;
+                    }
+
                     if (e.button == 0) {
                         if (IsDraggingPort) {
                             if (IsHoveringPort && hoveredPort.IsInput) {
@@ -135,14 +140,8 @@ namespace XNodeEditor {
                             selectionBox = new Rect(boxStartPos, boxSize);
                             Repaint();
                         }
-                    } else if (e.button == 1 || e.button == 2) {
-                        Vector2 tempOffset = panOffset;
-                        tempOffset += e.delta * zoom;
-                        // Round value to increase crispyness of UI text
-                        tempOffset.x = Mathf.Round(tempOffset.x);
-                        tempOffset.y = Mathf.Round(tempOffset.y);
-                        panOffset = tempOffset;
-                        isPanning = true;
+                    } else if ((e.button == 1 || e.button == 2) && e.alt) {
+                        SetupPanning(e);
                     }
                     break;
                 case EventType.MouseDown:
@@ -317,6 +316,16 @@ namespace XNodeEditor {
                     }
                     break;
             }
+        }
+
+        private void SetupPanning(Event e) {
+            Vector2 tempOffset = panOffset;
+            tempOffset += e.delta * zoom;
+            // Round value to increase crispyness of UI text
+            tempOffset.x = Mathf.Round(tempOffset.x);
+            tempOffset.y = Mathf.Round(tempOffset.y);
+            panOffset = tempOffset;
+            isPanning = true;
         }
 
         private void RecalculateDragOffsets(Event current) {
