@@ -38,9 +38,9 @@ namespace XNodeEditor {
 
             if (currentActivity == NodeActivity.AddingNode) {
                 BeginWindows();
-                contextWindowRect = new Rect(contextMenuMousePos, Vector2.one * 200);
+                contextWindowRect = new Rect(contextMenuMousePos, Vector2.one * 400);
                 // All GUI.Window or GUILayout.Window must come inside here
-                contextWindowRect = GUILayout.Window(1, contextWindowRect, DrawWindow, "Actions");
+                contextWindowRect = GUILayout.Window(1, contextWindowRect, DrawWindow, "Add node");
                 EndWindows();
             }
 
@@ -55,13 +55,13 @@ namespace XNodeEditor {
 
         // The window function. This works just like ingame GUI.Window
         private void DrawWindow(int unusedWindowID) {
-            _searchText = GUILayout.TextField(_searchText);
+            _searchText = GUILayout.TextField(_searchText, GUI.skin.FindStyle("ToolbarSeachTextField"), GUILayout.Height(50));
             var typeNames = nodeTypes.Select(x => new { type = x, name = GetNodeMenuName(x), tags = GetNodeMenuTags(x) })
                 .Where(x => !string.IsNullOrEmpty(x.tags.Union(new[] { x.name }).FirstOrDefault(tag => tag.ToLower().Contains(_searchText.ToLower()))))
                 .ToArray();
             
             foreach (var availableNodeType in typeNames) {
-                if (GUILayout.Button(Path.GetFileName(availableNodeType.name))) {
+                if (GUILayout.Button(Path.GetFileName(availableNodeType.name), GUILayout.Height(50))) {
                     Vector2 pos = NodeEditorWindow.current.WindowToGridPosition(Event.current.mousePosition);
                     graphEditor.CreateNode(availableNodeType.type, contextWindowRect.center);
                     currentActivity = NodeActivity.Idle;
