@@ -150,9 +150,7 @@ namespace XNodeEditor {
         public static bool OnOpen(int instanceID, int line) {
             XNode.INodeGraph nodeGraph = EditorUtility.InstanceIDToObject(instanceID) as XNode.INodeGraph;
             if (nodeGraph != null) {
-                NodeEditorWindow w = GetWindow(typeof(NodeEditorWindow), false, "xNode", true) as NodeEditorWindow;
-                w.wantsMouseMove = true;
-                w.graph = nodeGraph;
+                OpenWithGraph(nodeGraph);
                 return true;
             }
             return false;
@@ -161,7 +159,11 @@ namespace XNodeEditor {
         [MenuItem("Window/XNode/OpenGraph with Selected")]
         public static void OpenSelectedObject() {
             if(Selection.activeGameObject != null) {
-                OpenWithGraph(Selection.activeGameObject.GetComponent<XNode.INodeGraph>());
+                var graph = Selection.activeGameObject.GetComponent<XNode.INodeGraph>();
+                if(graph == null) {
+                    graph = Selection.activeGameObject.GetComponentInParent<XNode.INodeGraph>();
+                }
+                OpenWithGraph(graph);
             } else {
                 OpenWithGraph(Selection.activeObject as XNode.INodeGraph);
             }
