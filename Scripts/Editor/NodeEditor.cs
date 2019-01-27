@@ -81,15 +81,6 @@ namespace XNodeEditor {
         }
 
         public virtual GUIStyle GetBodyStyle() {
-            var settings = NodeEditorPreferences.GetSettings();
-            if(settings.NodeTexture != null) {
-                var nodeBody = new GUIStyle();
-                nodeBody.normal.background = settings.NodeTexture;
-                nodeBody.border = new RectOffset(32, 32, 32, 32);
-                nodeBody.padding = new RectOffset(16, 16, 4, 16);
-                return nodeBody;
-            }
-
             return NodeEditorResources.styles.nodeBody;
         }
 
