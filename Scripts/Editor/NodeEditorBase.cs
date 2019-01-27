@@ -13,7 +13,7 @@ namespace XNodeEditor.Internal {
 		private static Dictionary<UnityEngine.Object, T> editors = new Dictionary<UnityEngine.Object, T>();
 
 		public static T GetEditor(K target) {
-			if (target == null) return default(T);
+			if ((target as UnityEngine.Object) == null) return default(T);
 			T editor;
 			if (!editors.TryGetValue(target as UnityEngine.Object, out editor)) {
 				Type type = target.GetType();
