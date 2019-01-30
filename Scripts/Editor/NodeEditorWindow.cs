@@ -72,6 +72,7 @@ namespace XNodeEditor {
             current = this;
             graphEditor = NodeGraphEditor.GetEditor(graph);
             if (graphEditor != null && NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
+            OpenSelectedObject();
         }
 
         /// <summary> Create editor window </summary>
@@ -164,6 +165,7 @@ namespace XNodeEditor {
                     graph = Selection.activeGameObject.GetComponentInParent<XNode.INodeGraph>();
                 }
                 OpenWithGraph(graph);
+                RepaintAll();
             } else {
                 OpenWithGraph(Selection.activeObject as XNode.INodeGraph);
             }
