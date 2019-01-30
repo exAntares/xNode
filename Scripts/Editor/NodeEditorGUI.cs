@@ -57,8 +57,24 @@ namespace XNodeEditor {
         // The window function. This works just like ingame GUI.Window
         private void DrawWindow(int unusedWindowID) {
             _searchText = GUILayout.TextField(_searchText, GUI.skin.FindStyle("ToolbarSeachTextField"), GUILayout.Height(50));
+            var words = new string[0];
+            if (!string.IsNullOrEmpty(_searchText)) {
+                words = _searchText.Split(' ')
+                    .Distinct()
+                    .Where(s => !string.IsNullOrEmpty(s) && s != " ")
+                    .Select(x => x.ToLower())
+                    .ToArray();
+            }
+            
             var typeNames = nodeTypes.Select(x => new { type = x, name = GetNodeMenuName(x), tags = GetNodeMenuTags(x) })
-                .Where(x => !string.IsNullOrEmpty(x.tags.Union(new[] { x.name }).FirstOrDefault(tag => tag.ToLower().Contains(_searchText.ToLower()))))
+                .Where(x => {
+                    if (words.Length <= 0) {
+                        return true;
+                    }
+                    var tags = x.tags.Union(new[] { x.name }).Select(t => t.ToLower());
+                    var matchedWords = words.Where(w => tags.Any(tag => tag.Contains(w)));
+                    return matchedWords.Count() == words.Length;
+                    })
                 .ToArray();
             
             foreach (var availableNodeType in typeNames) {
