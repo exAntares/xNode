@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
@@ -17,7 +16,7 @@ namespace XNodeEditor {
 
         private string _searchText = string.Empty;
         private Rect contextWindowRect;
-        private Vector2 contextMenuMousePos;
+        public Vector2 contextMenuMousePos;
 
         private void OnGUI() {
             Event e = Event.current;
@@ -41,7 +40,7 @@ namespace XNodeEditor {
                 BeginWindows();
                 contextWindowRect = new Rect(contextMenuMousePos, Vector2.one * 400);
                 // All GUI.Window or GUILayout.Window must come inside here
-                contextWindowRect = GUILayout.Window(1, contextWindowRect, DrawWindow, "Add node");
+                contextWindowRect = GUILayout.Window(1, contextWindowRect, (unusedWindowID) => SearchWindowUtils.DrawWindow(ref _searchText, nodeTypes, contextMenuMousePos, this), "Add node");
                 EndWindows();
             }
 
@@ -52,64 +51,6 @@ namespace XNodeEditor {
             }
 
             GUI.matrix = m;
-        }
-
-        // The window function. This works just like ingame GUI.Window
-        private void DrawWindow(int unusedWindowID) {
-            _searchText = GUILayout.TextField(_searchText, GUI.skin.FindStyle("ToolbarSeachTextField"), GUILayout.Height(50));
-            var words = new string[0];
-            if (!string.IsNullOrEmpty(_searchText)) {
-                words = _searchText.Split(' ')
-                    .Distinct()
-                    .Where(s => !string.IsNullOrEmpty(s) && s != " ")
-                    .Select(x => x.ToLower())
-                    .ToArray();
-            }
-            
-            var typeNames = nodeTypes.Select(x => new { type = x, name = GetNodeMenuName(x), tags = GetNodeMenuTags(x) })
-                .Where(x => {
-                    if (words.Length <= 0) {
-                        return true;
-                    }
-                    var tags = x.tags.Union(new[] { x.name }).Select(t => t.ToLower());
-                    var matchedWords = words.Where(w => tags.Any(tag => tag.Contains(w)));
-                    return matchedWords.Count() == words.Length;
-                    })
-                .ToArray();
-            
-            foreach (var availableNodeType in typeNames) {
-                if (GUILayout.Button(Path.GetFileName(availableNodeType.name), GUILayout.Height(50))) {
-                    Vector2 curPos = WindowToGridPosition(contextMenuMousePos);
-                    graphEditor.CreateNode(availableNodeType.type, curPos);
-                    currentActivity = NodeActivity.Idle;
-                    Repaint();
-                }
-            }
-
-            if (GUILayout.Button("Preferences")) {
-                NodeEditorWindow.OpenPreferences();
-                currentActivity = NodeActivity.Idle;
-                Repaint();
-            }
-            GUI.DragWindow();
-        }
-
-        public static string GetNodeMenuName(Type type) {
-            //Check if type has the CreateNodeMenuAttribute
-            XNode.CreateNodeMenuAttribute attrib;
-            if (NodeEditorUtilities.GetAttrib(type, out attrib)) // Return custom path
-                return attrib.menuName;
-            else // Return generated path
-                return ObjectNames.NicifyVariableName(type.ToString().Replace('.', '/'));
-        }
-
-        public static string[] GetNodeMenuTags(Type type) {
-            //Check if type has the CreateNodeMenuAttribute
-            XNode.CreateNodeMenuAttribute attrib;
-            if (NodeEditorUtilities.GetAttrib(type, out attrib)) {// Return custom path
-                return attrib.Tags;
-            }
-            return new string[0];
         }
 
         public static void BeginZoomed(Rect rect, float zoom, float topPadding) {
