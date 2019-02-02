@@ -39,6 +39,14 @@ namespace XNodeEditor {
         }
     }
 
+    public static class Texture2DExt {
+        public static Texture2D SetPixelFluent(this Texture2D tex, int x, int y, Color color) {
+            tex.SetPixel(x, y, color);
+            tex.Apply();
+            return tex;
+        }
+    }
+
     public class CreateNodeMenu : PopupWindowContent {
         public Type[] AvailableTypes;
         public NodeEditorWindow ParentWindow;
@@ -48,13 +56,21 @@ namespace XNodeEditor {
         private static TreeNode currentNode;
         private string _searchText;
 
-        private static GUIStyle ButtonStyle = new GUIStyle(GUI.skin.button) {
+        private Texture FolderTexture => EditorGUIUtility.Load("Folder Icon") as Texture2D;
+
+        private readonly GUIStyle ButtonStyle = new GUIStyle(GUI.skin.box) {
             alignment = TextAnchor.MiddleRight,
-            onHover = new GUIStyleState() { textColor = Color.black },
-            //normal = new GUIStyleState() {  textColor = Color.blue, background = EditorGUIUtility.Load("Folder Icon") as Texture2D }
+            active = GUI.skin.button.active,
+            hover = new GUIStyleState() { background = new Texture2D(1, 1).SetPixelFluent(0, 0, new Color(160.0f/250.0f, 0.0f, 170/250.0f, 0.5f)) },
+            normal = new GUIStyleState() { background = Texture2D.blackTexture }
         };
-        private static GUIStyle BackButtonStyle = new GUIStyle(GUI.skin.button) {
+
+        private readonly GUIStyle BackButtonStyle = new GUIStyle(GUI.skin.button) {
             alignment = TextAnchor.MiddleLeft,
+        };
+
+        private readonly GUIStyle LabelMiddle = new GUIStyle(GUI.skin.label) {
+            alignment = TextAnchor.MiddleCenter,
         };
 
         public override Vector2 GetWindowSize() => new Vector2(600, 500);
@@ -62,6 +78,10 @@ namespace XNodeEditor {
         public override void OnGUI(Rect rect) => DrawWindow(ref _searchText, AvailableTypes, ParentWindow);
 
         public void DrawWindow(ref string searchText, Type[] nodeTypes, NodeEditorWindow parentWindow) {
+            if (Event.current.type == EventType.MouseMove) {
+                editorWindow.Repaint();
+            }
+
             searchText = GUILayout.TextField(searchText, GUI.skin.FindStyle("ToolbarSeachTextField"), GUILayout.Height(50));
             var words = new string[0];
             bool IsSearching = !string.IsNullOrEmpty(searchText);
@@ -110,16 +130,27 @@ namespace XNodeEditor {
                 }
 
                 foreach (var keyvalue in currentNode.Children) {
+                    const int height = 40;
                     var isLeafNode = keyvalue.Value.Children.Count <= 0;
-                    GUILayout.BeginHorizontal();
-                    if (GUI.Button(EditorGUILayout.GetControlRect(GUILayout.Height(50)), $"{keyvalue.Key}{(isLeafNode ? string.Empty : " >")}", ButtonStyle)) {
+                    var controlRect = EditorGUILayout.GetControlRect(GUILayout.Height(height));
+                    var labelRect = new Rect(controlRect);
+                    GUI.Box(controlRect, string.Empty);
+                    if (!isLeafNode) {
+                        labelRect.xMin += height;
+                        var textureRect = new Rect(controlRect);
+                        textureRect.width = height;
+                        GUI.DrawTexture(textureRect, FolderTexture);
+                    }
+
+                    if (GUI.Button(controlRect, string.Empty, ButtonStyle)) {
                         if (keyvalue.Value.Children.Count <= 0) {
                             CreateNode(RequestedPos, parentWindow, keyvalue.Value.NodeType);
                         } else {
                             currentNode = keyvalue.Value;
                         }
                     }
-                    GUILayout.EndHorizontal();
+
+                    GUI.Label(labelRect, $"{keyvalue.Key}", LabelMiddle);
                 }
             }
 
