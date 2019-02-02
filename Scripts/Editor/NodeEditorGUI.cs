@@ -37,11 +37,14 @@ namespace XNodeEditor {
             graphEditor.OnGUI();
 
             if (currentActivity == NodeActivity.AddingNode) {
-                BeginWindows();
-                contextWindowRect = new Rect(contextMenuMousePos, Vector2.one * 400);
-                // All GUI.Window or GUILayout.Window must come inside here
-                contextWindowRect = GUILayout.Window(1, contextWindowRect, (unusedWindowID) => SearchWindowUtils.DrawWindow(ref _searchText, nodeTypes, contextMenuMousePos, this), "Add node");
-                EndWindows();
+                currentActivity = NodeActivity.Idle;
+                contextWindowRect = new Rect(contextMenuMousePos, Vector2.one);
+                var popup = new CreateNodeMenu() {
+                    ParentWindow = this,
+                    AvailableTypes = nodeTypes,
+                    RequestedPos = contextMenuMousePos,
+                };
+                PopupWindow.Show(contextWindowRect, popup);
             }
 
             // Run and reset onLateGUI
