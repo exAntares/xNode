@@ -56,21 +56,25 @@ namespace XNodeEditor {
         private static TreeNode currentNode;
         private string _searchText;
 
+        private const int Height = 40;
+        private const int SpaceHeight = 20;
+        private const int SpaceHeightSmall = 5;
+
         private static readonly Texture FolderTexture = EditorGUIUtility.Load("Folder Icon") as Texture2D;
+        private static readonly Texture PlayTexture = EditorGUIUtility.Load("d_PlayButton") as Texture2D;
 
         private static readonly GUIStyle ButtonStyle = new GUIStyle(GUI.skin.box) {
-            alignment = TextAnchor.MiddleRight,
+            alignment = TextAnchor.MiddleCenter,
             active = GUI.skin.button.active,
-            hover = new GUIStyleState() { background = new Texture2D(1, 1).SetPixelFluent(0, 0, new Color(160.0f/250.0f, 0.0f, 170/250.0f, 0.5f)) },
-            normal = new GUIStyleState() { background = Texture2D.blackTexture }
+            hover = new GUIStyleState() { textColor = Color.white, background = new Texture2D(1, 1).SetPixelFluent(0, 0, new Color(140.0f/250.0f, 0.0f, 1.0f, 0.5f)) },
+            normal = new GUIStyleState() { textColor = Color.white, background = Texture2D.blackTexture }
         };
 
         private static readonly GUIStyle BackButtonStyle = new GUIStyle(GUI.skin.button) {
             alignment = TextAnchor.MiddleLeft,
         };
 
-        private static readonly GUIStyle LabelMiddle = new GUIStyle(GUI.skin.label) {
-            alignment = TextAnchor.MiddleCenter,
+        private static readonly GUIStyle ToolbarSeachTextField = new GUIStyle(GUI.skin.FindStyle("ToolbarSeachTextField")) {
         };
 
         public override Vector2 GetWindowSize() => new Vector2(600, 500);
@@ -81,8 +85,9 @@ namespace XNodeEditor {
             if (Event.current.type == EventType.MouseMove) {
                 editorWindow.Repaint();
             }
-
-            searchText = GUILayout.TextField(searchText, GUI.skin.FindStyle("ToolbarSeachTextField"), GUILayout.Height(50));
+            
+            GUILayout.Space(SpaceHeight);
+            searchText = GUILayout.TextField(searchText, ToolbarSeachTextField);
             var words = new string[0];
             bool IsSearching = !string.IsNullOrEmpty(searchText);
             if (IsSearching) {
@@ -103,10 +108,14 @@ namespace XNodeEditor {
                     })
                     .ToArray();
 
+                GUILayout.Space(SpaceHeight);
                 foreach (var availableNodeType in typeNames) {
-                    if (GUILayout.Button(Path.GetFileName(availableNodeType.name), GUILayout.Height(50))) {
+                    var controlRect = EditorGUILayout.GetControlRect(GUILayout.Height(Height));
+                    GUI.Box(controlRect, string.Empty);
+                    if (GUI.Button(controlRect, Path.GetFileName(availableNodeType.name), ButtonStyle)) {
                         CreateNode(RequestedPos, parentWindow, availableNodeType.type);
                     }
+                    GUILayout.Space(SpaceHeightSmall);
                 }
             } else {
                 var typeNames = nodeTypes.Select(GetNodeMenuData);
@@ -123,40 +132,36 @@ namespace XNodeEditor {
 
                 currentNode = currentNode ?? root;
                 if (currentNode != root) {
-                    if (GUI.Button(EditorGUILayout.GetControlRect(GUILayout.Height(20)), "< Back", BackButtonStyle)) {
+                    GUILayout.Space(SpaceHeight);
+                    if (GUI.Button(EditorGUILayout.GetControlRect(GUILayout.Height(50)), "< Back", BackButtonStyle)) {
                         currentNode = currentNode.Parent;
                     }
-                    GUILayout.Space(20);
                 }
 
+                GUILayout.Space(SpaceHeight);
                 foreach (var keyvalue in currentNode.Children) {
-                    const int height = 40;
                     var isLeafNode = keyvalue.Value.Children.Count <= 0;
-                    var controlRect = EditorGUILayout.GetControlRect(GUILayout.Height(height));
+                    var controlRect = EditorGUILayout.GetControlRect(GUILayout.Height(Height));
                     var labelRect = new Rect(controlRect);
                     GUI.Box(controlRect, string.Empty);
                     if (!isLeafNode) {
-                        labelRect.xMin += height;
+                        labelRect.xMin += Height;
                         var textureRect = new Rect(controlRect);
-                        textureRect.width = height;
+                        textureRect.width = Height;
                         GUI.DrawTexture(textureRect, FolderTexture);
+                        textureRect.x = controlRect.width - textureRect.width;
+                        GUI.DrawTexture(textureRect, PlayTexture);
                     }
 
-                    if (GUI.Button(controlRect, string.Empty, ButtonStyle)) {
+                    if (GUI.Button(controlRect, keyvalue.Key, ButtonStyle)) {
                         if (keyvalue.Value.Children.Count <= 0) {
                             CreateNode(RequestedPos, parentWindow, keyvalue.Value.NodeType);
                         } else {
                             currentNode = keyvalue.Value;
                         }
                     }
-
-                    GUI.Label(labelRect, $"{keyvalue.Key}", LabelMiddle);
+                    GUILayout.Space(SpaceHeightSmall);
                 }
-            }
-
-            if (GUILayout.Button("Preferences")) {
-                NodeEditorWindow.OpenPreferences();
-                parentWindow.Repaint();
             }
         }
 
