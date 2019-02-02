@@ -56,20 +56,20 @@ namespace XNodeEditor {
         private static TreeNode currentNode;
         private string _searchText;
 
-        private Texture FolderTexture => EditorGUIUtility.Load("Folder Icon") as Texture2D;
+        private static readonly Texture FolderTexture = EditorGUIUtility.Load("Folder Icon") as Texture2D;
 
-        private readonly GUIStyle ButtonStyle = new GUIStyle(GUI.skin.box) {
+        private static readonly GUIStyle ButtonStyle = new GUIStyle(GUI.skin.box) {
             alignment = TextAnchor.MiddleRight,
             active = GUI.skin.button.active,
             hover = new GUIStyleState() { background = new Texture2D(1, 1).SetPixelFluent(0, 0, new Color(160.0f/250.0f, 0.0f, 170/250.0f, 0.5f)) },
             normal = new GUIStyleState() { background = Texture2D.blackTexture }
         };
 
-        private readonly GUIStyle BackButtonStyle = new GUIStyle(GUI.skin.button) {
+        private static readonly GUIStyle BackButtonStyle = new GUIStyle(GUI.skin.button) {
             alignment = TextAnchor.MiddleLeft,
         };
 
-        private readonly GUIStyle LabelMiddle = new GUIStyle(GUI.skin.label) {
+        private static readonly GUIStyle LabelMiddle = new GUIStyle(GUI.skin.label) {
             alignment = TextAnchor.MiddleCenter,
         };
 
