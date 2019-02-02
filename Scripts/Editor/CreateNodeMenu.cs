@@ -68,11 +68,13 @@ namespace XNodeEditor {
             alignment = TextAnchor.MiddleCenter,
             active = GUI.skin.button.active,
             hover = new GUIStyleState() { textColor = Color.white, background = new Texture2D(1, 1).SetPixelFluent(0, 0, new Color(140.0f/250.0f, 0.0f, 1.0f, 0.5f)) },
-            normal = new GUIStyleState() { textColor = Color.white, background = Texture2D.blackTexture }
+            normal = new GUIStyleState() { textColor = Color.white, background = Texture2D.blackTexture },
+            fontSize = 25,
         };
 
         private static readonly GUIStyle BackButtonStyle = new GUIStyle(GUI.skin.button) {
             alignment = TextAnchor.MiddleLeft,
+            fontSize = 25,
         };
 
         private static readonly GUIStyle ToolbarSeachTextField = new GUIStyle(GUI.skin.FindStyle("ToolbarSeachTextField")) {
@@ -107,6 +109,7 @@ namespace XNodeEditor {
                         var matchedWords = words.Where(w => tags.Any(tag => tag.Contains(w)));
                         return matchedWords.Count() == words.Length;
                     })
+                    .OrderBy(x => x.name)
                     .ToArray();
 
                 GUILayout.Space(SpaceHeight);
@@ -133,18 +136,21 @@ namespace XNodeEditor {
                 if (currentNode != root) {
                     GUILayout.Space(SpaceHeight);
                     if (GUI.Button(EditorGUILayout.GetControlRect(GUILayout.Height(50)), "< Back", BackButtonStyle)) {
+                        scrollPosition = Vector2.zero;
                         currentNode = currentNode.Parent;
                     }
                 }
 
                 GUILayout.Space(SpaceHeight);
                 scrollPosition = GUILayout.BeginScrollView(scrollPosition);
-                foreach (var keyvalue in currentNode.Children) {
+                var children = currentNode.Children.OrderBy(x => x.Key);
+                foreach (var keyvalue in children) {
                     var controlRect = EditorGUILayout.GetControlRect(GUILayout.Height(Height));
                     if(DrawNodeButton(controlRect, keyvalue.Key, keyvalue.Value.Children.Count <= 0)) {
                         if (keyvalue.Value.Children.Count <= 0) {
                             CreateNode(RequestedPos, keyvalue.Value.NodeType);
                         } else {
+                            scrollPosition = Vector2.zero;
                             currentNode = keyvalue.Value;
                         }
                     }
@@ -166,6 +172,7 @@ namespace XNodeEditor {
                 textureRect.x = controlRect.width - textureRect.width;
                 GUI.DrawTexture(textureRect, PlayTexture);
             } else {
+                text = ObjectNames.NicifyVariableName(text);
                 GUI.DrawTexture(textureRect, CSScriptIcon);
             }
 
