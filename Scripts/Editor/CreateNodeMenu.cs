@@ -105,7 +105,7 @@ namespace XNodeEditor {
                         if (words.Length <= 0) {
                             return true;
                         }
-                        var tags = x.tags.Union(new[] { x.name }).Select(t => t.ToLower());
+                        var tags = x.tags.Select(t => t.ToLower());
                         var matchedWords = words.Where(w => tags.Any(tag => tag.Contains(w)));
                         return matchedWords.Count() == words.Length;
                     })
@@ -191,10 +191,13 @@ namespace XNodeEditor {
         public static (Type type, string name, string[] tags) GetNodeMenuData(Type sourcetype) {
             //Check if type has the CreateNodeMenuAttribute
             XNode.CreateNodeMenuAttribute attrib;
+            var nicifyVariableName = ObjectNames.NicifyVariableName(sourcetype.ToString().Replace('.', '/'));
             if (NodeEditorUtilities.GetAttrib(sourcetype, out attrib)) {// Return custom path
-                return (sourcetype, attrib.menuName, attrib.Tags);
+                var tags = nicifyVariableName.Split(' ').Union(attrib.Tags).Distinct().ToArray();
+                return (sourcetype, attrib.menuName, tags);
             }
-            return (sourcetype, ObjectNames.NicifyVariableName(sourcetype.ToString().Replace('.', '/')), new string[0]);
+            
+            return (sourcetype, nicifyVariableName, nicifyVariableName.Split(' '));
         }
     }
 }
