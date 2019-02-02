@@ -6,7 +6,7 @@ using UnityEditor;
 using UnityEngine;
 
 namespace XNodeEditor {
-    internal class TreeNode {
+    public class TreeNode {
         public string Name { get; }
         public TreeNode Parent { get; }
         public Type NodeType { get; }
@@ -55,14 +55,15 @@ namespace XNodeEditor {
         private static TreeNode root;
         private static TreeNode currentNode;
         private string _searchText;
-
+        private Vector2 scrollPosition;
         private const int Height = 40;
         private const int SpaceHeight = 20;
         private const int SpaceHeightSmall = 5;
 
         private static readonly Texture FolderTexture = EditorGUIUtility.Load("Folder Icon") as Texture2D;
         private static readonly Texture PlayTexture = EditorGUIUtility.Load("d_PlayButton") as Texture2D;
-
+        private static readonly Texture CSScriptIcon = EditorGUIUtility.Load("cs Script Icon") as Texture2D;
+        
         private static readonly GUIStyle ButtonStyle = new GUIStyle(GUI.skin.box) {
             alignment = TextAnchor.MiddleCenter,
             active = GUI.skin.button.active,
@@ -111,11 +112,9 @@ namespace XNodeEditor {
                 GUILayout.Space(SpaceHeight);
                 foreach (var availableNodeType in typeNames) {
                     var controlRect = EditorGUILayout.GetControlRect(GUILayout.Height(Height));
-                    GUI.Box(controlRect, string.Empty);
-                    if (GUI.Button(controlRect, Path.GetFileName(availableNodeType.name), ButtonStyle)) {
-                        CreateNode(RequestedPos, parentWindow, availableNodeType.type);
+                    if(DrawNodeButton(controlRect, Path.GetFileName(availableNodeType.name), true)) {
+                        CreateNode(RequestedPos, availableNodeType.type);
                     }
-                    GUILayout.Space(SpaceHeightSmall);
                 }
             } else {
                 var typeNames = nodeTypes.Select(GetNodeMenuData);
@@ -139,36 +138,46 @@ namespace XNodeEditor {
                 }
 
                 GUILayout.Space(SpaceHeight);
+                scrollPosition = GUILayout.BeginScrollView(scrollPosition);
                 foreach (var keyvalue in currentNode.Children) {
-                    var isLeafNode = keyvalue.Value.Children.Count <= 0;
                     var controlRect = EditorGUILayout.GetControlRect(GUILayout.Height(Height));
-                    var labelRect = new Rect(controlRect);
-                    GUI.Box(controlRect, string.Empty);
-                    if (!isLeafNode) {
-                        labelRect.xMin += Height;
-                        var textureRect = new Rect(controlRect);
-                        textureRect.width = Height;
-                        GUI.DrawTexture(textureRect, FolderTexture);
-                        textureRect.x = controlRect.width - textureRect.width;
-                        GUI.DrawTexture(textureRect, PlayTexture);
-                    }
-
-                    if (GUI.Button(controlRect, keyvalue.Key, ButtonStyle)) {
+                    if(DrawNodeButton(controlRect, keyvalue.Key, keyvalue.Value.Children.Count <= 0)) {
                         if (keyvalue.Value.Children.Count <= 0) {
-                            CreateNode(RequestedPos, parentWindow, keyvalue.Value.NodeType);
+                            CreateNode(RequestedPos, keyvalue.Value.NodeType);
                         } else {
                             currentNode = keyvalue.Value;
                         }
                     }
-                    GUILayout.Space(SpaceHeightSmall);
+
                 }
+                GUILayout.EndScrollView();
+                GUILayout.Space(SpaceHeight);
             }
         }
 
-        public void CreateNode(Vector2 position, NodeEditorWindow parentWindow, Type nodeType) {
-            Vector2 curPos = parentWindow.WindowToGridPosition(position);
-            parentWindow.graphEditor.CreateNode(nodeType, curPos);
-            parentWindow.Repaint();
+        public static bool DrawNodeButton(Rect controlRect, string text, bool isLeaf) {
+            var result = false;
+            GUI.Box(controlRect, string.Empty);
+            var textureRect = new Rect(controlRect);
+            textureRect.width = Height;
+
+            if (!isLeaf) {
+                GUI.DrawTexture(textureRect, FolderTexture);
+                textureRect.x = controlRect.width - textureRect.width;
+                GUI.DrawTexture(textureRect, PlayTexture);
+            } else {
+                GUI.DrawTexture(textureRect, CSScriptIcon);
+            }
+
+            result = GUI.Button(controlRect, text, ButtonStyle);
+            GUILayout.Space(SpaceHeightSmall);
+            return result;
+        }
+
+        public void CreateNode(Vector2 position, Type nodeType) {
+            Vector2 curPos = ParentWindow.WindowToGridPosition(position);
+            ParentWindow.graphEditor.CreateNode(nodeType, curPos);
+            ParentWindow.Repaint();
             editorWindow.Close();
         }
 
