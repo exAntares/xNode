@@ -165,7 +165,6 @@ namespace XNodeEditor {
                     graph = Selection.activeGameObject.GetComponentInParent<XNode.INodeGraph>();
                 }
                 OpenWithGraph(graph);
-                RepaintAll();
             } else {
                 OpenWithGraph(Selection.activeObject as XNode.INodeGraph);
             }
@@ -176,6 +175,7 @@ namespace XNodeEditor {
                 NodeEditorWindow w = GetWindow(typeof(NodeEditorWindow), false, "xNode", false) as NodeEditorWindow;
                 w.wantsMouseMove = true;
                 w.graph = nodeGraph;
+                w.Repaint();
             }
         }
 
