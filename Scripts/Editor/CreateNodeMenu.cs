@@ -90,7 +90,9 @@ namespace XNodeEditor {
             }
             
             GUILayout.Space(SpaceHeight);
+            GUI.SetNextControlName("search_field");
             searchText = GUILayout.TextField(searchText, ToolbarSeachTextField);
+            GUI.FocusControl("search_field");
             var words = new string[0];
             bool IsSearching = !string.IsNullOrEmpty(searchText);
             if (IsSearching) {
