@@ -218,13 +218,13 @@ namespace XNodeEditor {
                         } else if (currentActivity == NodeActivity.DragNode) {
                             var nodes = Selection.objects.Where(x => x is XNode.INode).Select(x => x as XNode.INode);
                             foreach (XNode.INode node in nodes) EditorUtility.SetDirty(node as UnityEngine.Object);
-                            if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
+                            if (NodeEditorPreferences.GetSettings().autoSave) { AssetDatabase.SaveAssets(); }
                         } else if (!IsHoveringNode) {
                             // If click outside node, release field focus
                             if (!isPanning) {
                                 EditorGUI.FocusTextInControl(null);
                             }
-                            if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
+                            if (NodeEditorPreferences.GetSettings().autoSave) { AssetDatabase.SaveAssets(); }
                         }
 
                         // If click node header, select it.
@@ -449,9 +449,7 @@ namespace XNodeEditor {
                 to = draggedOutputTarget != null ? portConnectionPoints[draggedOutputTarget].center : WindowToGridPosition(Event.current.mousePosition);
                 DrawConnection(from, to, col);
 
-                Color bgcol = Color.black;
                 Color frcol = col;
-                bgcol.a = 0.6f;
                 frcol.a = 0.6f;
 
                 // Loop through reroute points again and draw the points
@@ -461,7 +459,7 @@ namespace XNodeEditor {
                     rect.position = new Vector2(rect.position.x - 8, rect.position.y - 8);
                     rect = GridToWindowRect(rect);
 
-                    NodeEditorGUILayout.DrawPortHandle(rect, bgcol, frcol);
+                    NodeEditorGUILayout.DrawPortHandle(rect, frcol, NodeEditorResources.dot);
                 }
             }
         }
