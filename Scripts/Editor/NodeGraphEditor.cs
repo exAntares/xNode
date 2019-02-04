@@ -66,12 +66,15 @@ namespace XNodeEditor {
         }
 
         /// <summary> Create a node and save it in the graph asset </summary>
-        public virtual void CreateNode(Type type, Vector2 position) {
+        public virtual INode CreateNode(Type type, Vector2 position) {
             INode node = Target.AddNode(type);
             node.Position = position;
             node.Name = UnityEditor.ObjectNames.NicifyVariableName(type.Name);
-            if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
+            if (NodeEditorPreferences.GetSettings().autoSave) {
+                AssetDatabase.SaveAssets();
+            }
             NodeEditorWindow.RepaintAll();
+            return node;
         }
 
         /// <summary> Creates a copy of the original node in the graph </summary>
