@@ -213,24 +213,8 @@ namespace XNodeEditor {
                     if (e.button == 0) {
                         //Port drag release
                         if (IsDraggingPort) {
-                            //If connection is valid, save it
-                            if (draggedOutputTarget != null) {
-                                var node = draggedOutputTarget.node;
-                                if (graph.NodesCount != 0) draggedOutput.Connect(draggedOutputTarget);
-
-                                // ConnectionIndex can be -1 if the connection is removed instantly after creation
-                                int connectionIndex = draggedOutput.GetConnectionIndex(draggedOutputTarget);
-                                if (connectionIndex != -1) {
-                                    draggedOutput.GetReroutePoints(connectionIndex).AddRange(draggedOutputReroutes);
-                                    if (NodeEditor.onUpdateNode != null) NodeEditor.onUpdateNode(node);
-                                    EditorUtility.SetDirty(graph as UnityEngine.Object);
-                                }
-                            }
-                            //Release dragged connection
-                            draggedOutput = null;
-                            draggedOutputTarget = null;
-                            EditorUtility.SetDirty(graph as UnityEngine.Object);
-                            if (NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
+                            OnReleasePort();
+                            return;
                         } else if (currentActivity == NodeActivity.DragNode) {
                             var nodes = Selection.objects.Where(x => x is XNode.INode).Select(x => x as XNode.INode);
                             foreach (XNode.INode node in nodes) EditorUtility.SetDirty(node as UnityEngine.Object);
@@ -274,12 +258,7 @@ namespace XNodeEditor {
                                 NodeEditor.GetEditor(hoveredNode).AddContextMenuItems(menu);
                                 menu.DropDown(new Rect(Event.current.mousePosition, Vector2.zero));
                             } else if (!IsHoveringNode) {
-                                contextMenuMousePos = Event.current.mousePosition;
-                                currentActivity = NodeActivity.AddingNode;
-                                Repaint();
-                                //GenericMenu menu = new GenericMenu();
-                                //graphEditor.AddContextMenuItems(menu);
-                                //menu.DropDown(new Rect(Event.current.mousePosition, Vector2.zero));
+                                RequestOpenCreateNodePopup();
                             }
                         }
                         isPanning = false;
@@ -316,6 +295,39 @@ namespace XNodeEditor {
                     }
                     break;
             }
+        }
+
+        private void OnReleasePort() {
+            //If connection is valid, save it
+            if (draggedOutputTarget != null) {
+                var node = draggedOutputTarget.node;
+                if (graph.NodesCount != 0) {
+                    draggedOutput.Connect(draggedOutputTarget);
+                }
+
+                // ConnectionIndex can be -1 if the connection is removed instantly after creation
+                int connectionIndex = draggedOutput.GetConnectionIndex(draggedOutputTarget);
+                if (connectionIndex != -1) {
+                    draggedOutput.GetReroutePoints(connectionIndex).AddRange(draggedOutputReroutes);
+                    NodeEditor.onUpdateNode?.Invoke(node);
+                }
+            } else {
+                RequestOpenCreateNodePopup();
+            }
+
+            //Release dragged connection
+            draggedOutput = null;
+            draggedOutputTarget = null;
+            EditorUtility.SetDirty(graph as UnityEngine.Object);
+            if (NodeEditorPreferences.GetSettings().autoSave) {
+                AssetDatabase.SaveAssets();
+            }
+        }
+
+        private void RequestOpenCreateNodePopup() {
+            contextMenuMousePos = Event.current.mousePosition;
+            currentActivity = NodeActivity.AddingNode;
+            Repaint();
         }
 
         private void SetupPanning(Event e) {
