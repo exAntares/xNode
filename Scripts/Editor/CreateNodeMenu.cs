@@ -67,8 +67,8 @@ namespace XNodeEditor {
         private static readonly GUIStyle ButtonStyle = new GUIStyle(GUI.skin.box) {
             alignment = TextAnchor.MiddleCenter,
             active = GUI.skin.button.active,
-            hover = new GUIStyleState() { textColor = Color.white, background = new Texture2D(1, 1).SetPixelFluent(0, 0, new Color(140.0f/250.0f, 0.0f, 1.0f, 0.5f)) },
-            normal = new GUIStyleState() { textColor = Color.white, background = Texture2D.blackTexture },
+            hover = new GUIStyleState() { textColor = EditorGUIUtility.isProSkin ? Color.white : Color.black, background = new Texture2D(1, 1).SetPixelFluent(0, 0, new Color(140.0f/250.0f, 0.0f, 1.0f, 0.5f)) },
+            normal = new GUIStyleState() { textColor = EditorGUIUtility.isProSkin ? Color.white : Color.black, background = Texture2D.blackTexture },
             fontSize = 25,
         };
 
