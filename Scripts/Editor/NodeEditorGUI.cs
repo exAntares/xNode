@@ -29,9 +29,10 @@ namespace XNodeEditor {
             Controls();
 
             DrawGrid(position, zoom, panOffset);
-            DrawConnections();
+            var nodes = graph.GetNodes();
+            DrawConnections(nodes);
             DrawDraggedConnection();
-            DrawNodes();
+            DrawNodes(nodes);
             DrawSelectionBox();
             DrawTooltip();
             graphEditor.OnGUI();
@@ -184,13 +185,13 @@ namespace XNodeEditor {
         }
 
         /// <summary> Draws all connections </summary>
-        public void DrawConnections() {
+        public void DrawConnections(XNode.INode[] graphNodes) {
             Vector2 mousePos = Event.current.mousePosition;
             List<RerouteReference> selection = preBoxSelectionReroute != null ? new List<RerouteReference>(preBoxSelectionReroute) : new List<RerouteReference>();
             hoveredReroute = new RerouteReference();
 
             Color col = GUI.color;
-            foreach (XNode.INode node in graph.GetNodes()) {
+            foreach (XNode.INode node in graphNodes) {
                 //If a null node is found, return. This can happen if the nodes associated script is deleted. It is currently not possible in Unity to delete a null asset.
                 if (node == null) continue;
 
@@ -198,7 +199,9 @@ namespace XNodeEditor {
                 foreach (XNode.NodePort output in node.Outputs) {
                     //Needs cleanup. Null checks are ugly
                     Rect fromRect;
-                    if (!_portConnectionPoints.TryGetValue(output, out fromRect)) continue;
+                    if (!_portConnectionPoints.TryGetValue(output, out fromRect)) {
+                        continue;
+                    }
 
                     Color connectionColor = graphEditor.GetTypeColor(output.ValueType);
 
@@ -251,7 +254,7 @@ namespace XNodeEditor {
             if (Event.current.type != EventType.Layout && currentActivity == NodeActivity.DragGrid) selectedReroutes = selection;
         }
 
-        private void DrawNodes() {
+        private void DrawNodes(XNode.INode[] graphNodes) {
             Event e = Event.current;
             if (e.type == EventType.Layout) {
                 selectionCache = new List<UnityEngine.Object>(Selection.objects);
@@ -286,8 +289,10 @@ namespace XNodeEditor {
             //Save guiColor so we can revert it
             Color guiColor = GUI.color;
 
-            if (e.type == EventType.Layout) culledNodes = new List<XNode.INode>();
-            var graphNodes = graph.GetNodes();
+            if (e.type == EventType.Layout) {
+                culledNodes = new List<XNode.INode>(graphNodes.Length);
+            }
+
             for (int n = 0; n < graphNodes.Length; n++) {
                 // Skip null nodes. The user could be in the process of renaming scripts, so removing them at this point is not advisable.
                 if (graphNodes[n] == null) continue;
@@ -358,7 +363,7 @@ namespace XNodeEditor {
                     foreach (var kvp in NodeEditor.portPositions) {
                         Vector2 portHandlePos = kvp.Value;
                         portHandlePos += node.Position;
-                        Rect rect = new Rect(portHandlePos.x - 8, portHandlePos.y - 8, 16, 16);
+                        Rect rect = new Rect(portHandlePos.x - 8, portHandlePos.y - 12, 16, 16);
                         if (portConnectionPoints.ContainsKey(kvp.Key)) portConnectionPoints[kvp.Key] = rect;
                         else portConnectionPoints.Add(kvp.Key, rect);
                     }
