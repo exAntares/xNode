@@ -51,7 +51,7 @@ namespace XNode {
         public Vector2 Position { get { return position; } set { position = value; } }
         public string Name { get { return _name; } set { _name = value; } }
 
-        public void OnEnable() {
+        public virtual void OnEnable() {
             if (graphHotfix != null) graph = graphHotfix;
             graphHotfix = null;
             UpdateStaticPorts();
