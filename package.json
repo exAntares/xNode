@@ -1,0 +1,11 @@
+{
+    "name": "xNode",
+    "displayName": "xNode",
+    "version": "1.0.0",
+    "unity": "2018.1",
+    "description": "This package enable nodes graphs as Monobehaviours or ScriptableObjects",
+    "keywords": ["Nodes"],
+    "category": "Visual Scripting",
+    "dependencies": {
+    }
+}
