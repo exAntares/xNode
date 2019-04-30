@@ -22,14 +22,14 @@ namespace XNodeEditor {
             Event e = Event.current;
             Matrix4x4 m = GUI.matrix;
             if (graph == null) return;
-            graphEditor = NodeGraphEditor.GetEditor(graph);
+            graphEditor = NodeGraphEditor.GetEditor(graph as XNode.INodeGraph);
             if (graphEditor == null) return;
             graphEditor.position = position;
 
             Controls();
 
             DrawGrid(position, zoom, panOffset);
-            var nodes = graph.GetNodes();
+            var nodes = (graph as XNode.INodeGraph).GetNodes();
             DrawConnections(nodes);
             DrawDraggedConnection();
             DrawNodes(nodes);
@@ -321,7 +321,7 @@ namespace XNodeEditor {
 
                 GUILayout.BeginArea(new Rect(nodePos, new Vector2(nodeEditor.GetWidth(), 4000)));
 
-                bool selected = selectionCache.Contains(graph.GetNodes()[n] as UnityEngine.Object);
+                bool selected = selectionCache.Contains((graph as XNode.INodeGraph).GetNodes()[n] as UnityEngine.Object);
 
                 if (selected) {
                     GUIStyle style = new GUIStyle(nodeEditor.GetBodyStyle());

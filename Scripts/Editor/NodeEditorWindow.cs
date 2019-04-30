@@ -55,14 +55,14 @@ namespace XNodeEditor {
                 for (int i = 0; i < length; i++) {
                     XNode.NodePort nodePort = _references[i].GetNodePort();
                     if (nodePort != null)
-                        _portConnectionPoints.Add(nodePort, _rects[i]);
+                        _portConnectionPoints[nodePort] = _rects[i];
                 }
             }
         }
 
         public Dictionary<XNode.INode, Vector2> nodeSizes { get { return _nodeSizes; } }
         private Dictionary<XNode.INode, Vector2> _nodeSizes = new Dictionary<XNode.INode, Vector2>();
-        public XNode.INodeGraph graph;
+        public UnityEngine.Object graph;
         public Vector2 panOffset { get { return _panOffset; } set { _panOffset = value; Repaint(); } }
         private Vector2 _panOffset;
         public float zoom { get { return _zoom; } set { _zoom = Mathf.Clamp(value, 1f, 5f); Repaint(); } }
@@ -70,7 +70,7 @@ namespace XNodeEditor {
 
         void OnFocus() {
             current = this;
-            graphEditor = NodeGraphEditor.GetEditor(graph);
+            graphEditor = NodeGraphEditor.GetEditor(graph as XNode.INodeGraph);
             if (graphEditor != null && NodeEditorPreferences.GetSettings().autoSave) AssetDatabase.SaveAssets();
             OpenSelectedObject();
         }
@@ -174,7 +174,7 @@ namespace XNodeEditor {
             if (nodeGraph != null) {
                 NodeEditorWindow w = GetWindow(typeof(NodeEditorWindow), false, "xNode", false) as NodeEditorWindow;
                 w.wantsMouseMove = true;
-                w.graph = nodeGraph;
+                w.graph = nodeGraph as UnityEngine.Object;
                 w.Repaint();
             }
         }

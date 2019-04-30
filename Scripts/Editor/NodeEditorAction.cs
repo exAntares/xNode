@@ -301,7 +301,7 @@ namespace XNodeEditor {
             //If connection is valid, save it
             if (draggedOutputTarget != null) {
                 var node = draggedOutputTarget.node;
-                if (graph.NodesCount != 0) {
+                if ((graph as XNode.INodeGraph).NodesCount != 0) {
                     draggedOutput.Connect(draggedOutputTarget);
                 }
 
@@ -388,7 +388,7 @@ namespace XNodeEditor {
 
         /// <summary> Draw this node on top of other nodes by placing it last in the graph.nodes list </summary>
         public void MoveNodeToTop(XNode.INode node) {
-            graph.MoveNodeToTop(node);
+            (graph as XNode.INodeGraph).MoveNodeToTop(node);
         }
 
         /// <summary> Duplicate selected nodes and select the duplicates </summary>
